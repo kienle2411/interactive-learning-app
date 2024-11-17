@@ -33,7 +33,7 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > private_key.pem
           chmod 600 private_key.pem
           ssh -o StrictHostKeyChecking=no -i private_key.pem $VPS_USER@$VPS_HOST << 'EOF'
-              cd /home/g22520705/interactive-learning-app-be 
+              cd /home/g22520705/interactive-learning-app
               git pull origin dev
               npm install  
               npm run build 
