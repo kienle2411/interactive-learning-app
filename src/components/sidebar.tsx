@@ -48,7 +48,7 @@ export default function Sidebar() {
             </div>
 
             <div className="p-5 gap-y-3 ">
-                <MenuItem icon={<Settings />} title="Settings" path="/settings" />
+                <MenuItem icon={<Settings />} title="Settings" path="/settingsTab" />
             </div>
         </div>
     );

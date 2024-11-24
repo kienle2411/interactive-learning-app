@@ -1,8 +1,12 @@
 import React from 'react'
+import TeacherNavigationMenu from '../components/teacherHeader'
 
 function page() {
     return (
-        <div>page</div>
+        <>
+            <div>page</div>
+
+        </>
     )
 }
 
