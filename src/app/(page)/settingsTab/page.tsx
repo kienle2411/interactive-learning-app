@@ -76,7 +76,7 @@ const ProfileForm = () => {
                     </div>
 
                     <div className="flex space-x-4 pt-4">
-                        <Button type="submit" className="bg-green-500 hover:bg-green-600 text-white">
+                        <Button type="submit" variant="default">
                             Save
                         </Button>
                         <Button
