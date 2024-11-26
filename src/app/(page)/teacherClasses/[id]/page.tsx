@@ -25,7 +25,7 @@
 //     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
 //     const [student, setStudent] = useState("");
 //     const [students, setStudents] = useState<
-//         { id: string; student: string; group: number; score: string }[]
+//         { id: string; student: string; group: string; score: string }[]
 //     >([
 //         {
 //             id: "1",
@@ -133,11 +133,12 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function InvoiceTable() {
     const [open, setOpen] = useState(false);
     const [editGroupOpen, setEditGroupOpen] = useState(false);
-    const [currentStudent, setCurrentStudent] = useState<{ id: string; student: string; group: number; score: number } | null>(null);
+    const [currentStudent, setCurrentStudent] = useState<{ id: string; student: string; group: string; score: number } | null>(null);
 
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
@@ -146,7 +147,7 @@ export default function InvoiceTable() {
     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
     const [student, setStudent] = useState("");
     const [students, setStudents] = useState<
-        { id: string; student: string; group: number; score: number }[]
+        { id: string; student: string; group: string; score: number }[]
     >([]);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -156,7 +157,7 @@ export default function InvoiceTable() {
         const newStudent = {
             id: (students.length + 1).toString(), // Sequential ID
             student: student,
-            group: 0,
+            group: "null",
             score: 0,
         };
         setStudents([...students, newStudent]);
@@ -164,7 +165,7 @@ export default function InvoiceTable() {
         setOpen(false);
     };
 
-    const openEditGroupDialog = (student: { id: string; student: string; group: number; score: number }) => {
+    const openEditGroupDialog = (student: { id: string; student: string; group: string; score: number }) => {
         setCurrentStudent(student);
         setEditGroupOpen(true);
     };
@@ -230,6 +231,7 @@ export default function InvoiceTable() {
                 </Dialog>
             </div>
 
+            {/* edit dialog  */}
             <Dialog open={editGroupOpen} onOpenChange={setEditGroupOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
@@ -239,19 +241,38 @@ export default function InvoiceTable() {
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="group">Group</Label>
-                                <Input
+                                {/* <Input
                                     id="group"
-                                    type="number"
+                                    // type="number"
                                     value={currentStudent?.group || ""}
                                     onChange={(e) =>
                                         setCurrentStudent({
                                             ...currentStudent!,
-                                            group: parseInt(e.target.value) || 0,
+                                            group: (e.target.value) || "null",
                                         })
                                     }
                                     placeholder="Enter new group"
                                     required
-                                />
+                                /> */}
+                                <Select
+                                    value={currentStudent?.group?.toString() || ""}
+                                    onValueChange={(value) =>
+                                        setCurrentStudent({
+                                            ...currentStudent!,
+                                            group: (value),
+                                        })
+                                    }
+                                >
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue placeholder="Select a group" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="Group 1">Group 1</SelectItem>
+                                        <SelectItem value="Group 2">Group 2</SelectItem>
+                                        <SelectItem value="Group 3">Group 3</SelectItem>
+                                        <SelectItem value="Group 4">Group 4</SelectItem>
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         <DialogFooter>
