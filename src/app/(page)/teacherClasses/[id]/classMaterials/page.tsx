@@ -16,63 +16,101 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import Link from 'next/link';
 
-export default function GroupTable() {
+export default function MaterialTable() {
     const [open, setOpen] = useState(false);
-    const [editGroupOpen, setEditGroupOpen] = useState(false);
-    const [currentGroup, setCurrentGroup] = useState<{ id: string; group: string; score: number } | null>(null);
+
+    const [editMaterialOpen, setEditMaterialOpen] = useState(false);
+    const [currentMaterial, setCurrentMaterial] = useState<{ id: string; material: string; link: string } | null>(null);
 
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-    const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
+    const [materialToDelete, setMaterialToDelete] = useState<string | null>(null);
 
     const pathname = usePathname();
     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
-    const [group, setGroup] = useState("");
-    const [groups, setGroups] = useState<
-        { id: string; group: string; score: number }[]
+
+    const [material, setMaterial] = useState("");
+    const [link, setLink] = useState("");
+    const [materials, setMaterials] = useState<
+
+        { id: string; material: string; link: string }[]
     >([]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!group.trim()) return; // Prevent adding empty groups
+        if (!material.trim()) return; // Prevent adding empty materials
 
-        const newStudent = {
-            id: (groups.length + 1).toString(), // Sequential ID
-            group: group,
-            score: 0,
+        // Validate link if it exists
+        if (link && !isValidUrl(link)) {
+            alert('Invalid URL. Please enter a valid URL.');
+            return;
+        }
+
+        const newMaterial = {
+            id: (materials.length + 1).toString(), // Sequential ID
+            material: material,
+            link: link,
         };
-        setGroups([...groups, newStudent]);
-        setGroup("");
+
+        setMaterials([...materials, newMaterial]);
+        setMaterial("");
         setOpen(false);
     };
 
-    const openEditGroupDialog = (student: { id: string; group: string; score: number }) => {
-        setCurrentGroup(student);
-        setEditGroupOpen(true);
+    const openEditGroupDialog = (mat: { id: string; material: string; link: string }) => {
+        setCurrentMaterial(mat);
+        setEditMaterialOpen(true);
     };
 
     const handleUpdateGroup = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentGroup) return;
+        if (!currentMaterial) return;
 
-        setGroups(groups.map(std =>
-            std.id === currentGroup.id
-                ? { ...std, group: currentGroup.group }
+        // Validate link if it exists
+        if (currentMaterial.link && !isValidUrl(currentMaterial.link)) {
+            // Optional: You could use a toast or alert to show an error message
+            alert('Invalid URL. Please enter a valid web address.');
+            return;
+        }
+
+        setMaterials(materials.map(std =>
+            std.id === currentMaterial.id
+                ? { ...std, material: currentMaterial.material, link: currentMaterial.link, }
                 : std
         ));
-        setEditGroupOpen(false);
+        setEditMaterialOpen(false);
     };
 
     const confirmDelete = (id: string) => {
-        setStudentToDelete(id);
+        setMaterialToDelete(id);
         setDeleteConfirmOpen(true);
     };
 
     const handleDelete = () => {
-        if (studentToDelete) {
-            setGroups(groups.filter(std => std.id !== studentToDelete));
+        if (materialToDelete) {
+            setMaterials(materials.filter(std => std.id !== materialToDelete));
             setDeleteConfirmOpen(false);
-            setStudentToDelete(null);
+            setMaterialToDelete(null);
+        }
+    };
+
+    //check valid link
+    const isValidUrl = (url: string): boolean => {
+        try {
+            // Regular expression for URL validation
+            const urlPattern = new RegExp(
+                '^(https?:\\/\\/)?' + // protocol
+                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                '(\\#[-a-z\\d_]*)?$', 'i' // fragment locator
+            );
+
+            return urlPattern.test(url);
+        } catch (error) {
+            return false;
         }
     };
 
@@ -81,21 +119,31 @@ export default function GroupTable() {
             <div className="col-span-2 flex justify-end pb-4 w-full">
                 <Dialog open={open} onOpenChange={setOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="default">Create new Group</Button>
+                        <Button variant="default">Add new Material</Button>
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-[425px]">
                         <DialogHeader>
-                            <DialogTitle>Create a new Group</DialogTitle>
+                            <DialogTitle>Add a new Material</DialogTitle>
                         </DialogHeader>
                         <form onSubmit={handleSubmit}>
                             <div className="grid gap-4 py-4">
                                 <div className="grid gap-2">
-                                    <Label htmlFor="groupName">Group Name</Label>
+                                    <Label htmlFor="materialName">Material Name</Label>
                                     <Input
-                                        id="groupName"
-                                        value={group}
-                                        onChange={(e) => setGroup(e.target.value)}
-                                        placeholder="Enter group's name"
+                                        id="materialName"
+                                        value={material}
+                                        onChange={(e) => setMaterial(e.target.value)}
+                                        placeholder="Enter material's name"
+                                        required
+                                    />
+                                </div>
+                                <div className="grid gap-2">
+                                    <Label htmlFor="materialLink">Material Link</Label>
+                                    <Input
+                                        id="materialLink"
+                                        value={link}
+                                        onChange={(e) => setLink(e.target.value)}
+                                        placeholder="Enter material's link"
                                         required
                                     />
                                 </div>
@@ -108,7 +156,7 @@ export default function GroupTable() {
                 </Dialog>
             </div>
 
-            <Dialog open={editGroupOpen} onOpenChange={setEditGroupOpen}>
+            <Dialog open={editMaterialOpen} onOpenChange={setEditMaterialOpen}>
                 <DialogContent className="sm:max-w-[425px]">
                     <DialogHeader>
                         <DialogTitle>Update Group</DialogTitle>
@@ -119,15 +167,27 @@ export default function GroupTable() {
                                 <Label htmlFor="group">Group</Label>
                                 <Input
                                     id="group"
-                                    // type="number"
-                                    value={currentGroup?.group || ""}
+                                    value={currentMaterial?.material || ""}
                                     onChange={(e) =>
-                                        setCurrentGroup({
-                                            ...currentGroup!,
-                                            group: (e.target.value) || "null",
+                                        setCurrentMaterial({
+                                            ...currentMaterial!,
+                                            material: (e.target.value) || "null",
                                         })
                                     }
                                     placeholder="Enter new group"
+                                    required
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="materialLink">Material Link</Label>
+                                <Input
+                                    id="materialLink"
+                                    value={currentMaterial?.link || ""}
+                                    onChange={(e) => setCurrentMaterial({
+                                        ...currentMaterial!,
+                                        link: (e.target.value) || "null",
+                                    })}
+                                    placeholder="Enter material's link"
                                     required
                                 />
                             </div>
@@ -157,22 +217,22 @@ export default function GroupTable() {
 
             <Table>
                 <TableCaption>
-                    There are {groups.length} groups in {id} class
+                    There are {materials.length} materials in {id} class
                 </TableCaption>
                 <TableHeader className='bg-slate-200 text-lg'>
                     <TableRow>
                         <TableHead className="text-center font-bold text-black">No.</TableHead>
-                        <TableHead className="text-center font-bold text-black">Group Name</TableHead>
-                        <TableHead className="text-center font-bold text-black">Total Score</TableHead>
+                        <TableHead className="text-center font-bold text-black">Name</TableHead>
+                        <TableHead className="text-center font-bold text-black">Link</TableHead>
                         <TableHead className="text-center font-bold text-black">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody className='text-base'>
-                    {groups.map((std) => (
+                    {materials.map((std) => (
                         <TableRow key={std.id}>
                             <TableCell className="text-center">{std.id}</TableCell>
-                            <TableCell className="text-center">{std.group}</TableCell>
-                            <TableCell className="text-center">{std.score}</TableCell>
+                            <TableCell className="text-center">{std.material}</TableCell>
+                            <TableCell className="text-center"><a href={std.link}>{std.link}</a></TableCell>
                             <TableCell className="text-center">
                                 <Button className='m-2'
                                     variant="secondary"
