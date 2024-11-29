@@ -105,7 +105,7 @@ const QuestionCard: React.FC<QuestionProps> = ({
     return (
         <>
             {/* Hiển thị thẻ câu hỏi */}
-            <Card className="shadow-md">
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
                 <CardHeader className="flex flex-row items-center justify-between">
                     <CardTitle className="text-lg">{question}</CardTitle>
                     <DropdownMenu>
