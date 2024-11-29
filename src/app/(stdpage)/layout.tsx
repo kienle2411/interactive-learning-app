@@ -11,7 +11,7 @@ export default function RootLayout({
     return (
         <>
             <Header />
-            <div className="flex flex-1 flex-row mt-16 bg-blue-400 overflow-x-hidden overflow-y-auto">
+            <div className="flex flex-1 flex-row mt-16 overflow-x-hidden overflow-y-auto mb-16">
                 {children}
             </div>
             <StudentFooter />

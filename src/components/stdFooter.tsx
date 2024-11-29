@@ -41,7 +41,7 @@ function MenuItem({ icon, title, path }: MenuItemProps) {
 
 export default function StudentFooter() {
     return (
-        <div className="w-full absolute flex items-center justify-between border-t border-primary/50 bg-inherit bottom-0 z-10">
+        <div className="w-full fixed flex items-center justify-between border-t border-primary/50 bg-inherit bottom-0 z-10">
             <div className="grid grid-cols-3 w-full pt-1 pb-1 bg-green-600 text-white">
                 <MenuItem icon={<LibraryBig />} title="Classes" path="/studentClasses" />
                 <MenuItem icon={<Gamepad2 />} title="Games" path="/studentGames" />
