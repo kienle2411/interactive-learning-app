@@ -75,8 +75,8 @@ const TeacherNavigationMenu: React.FC = () => {
         { name: "Participant", href: `/teacherClasses/${id}` },
         { name: "Live Class", href: `/products` },
         { name: "Groups", href: `/teacherClasses/${id}/classGroup` },
-        { name: "Materials", href: `/news` },
-        { name: "Reports", href: `/contact` },
+        { name: "Materials", href: `/teacherClasses/${id}/classMaterials` },
+        { name: "Reports", href: `/teacherClasses/${id}/classReports` },
         { name: "Settings", href: `/teacherClasses/${id}/classSettings` },
     ];
 
