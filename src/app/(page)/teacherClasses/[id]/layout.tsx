@@ -1,21 +1,18 @@
-import { ThemeProvider } from "@/components/theme-provider";
-import Header from "@/components/header";
-import Sidebar from "@/components/sidebar";
 import TeacherNavigationMenu from "../components/teacherHeader";
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <>
-            <TeacherNavigationMenu />
-            <div className="flex flex-1 flex-row mt-4 w-full pl-4 pr-4">
-                <div className="overflow-x-hidden flex flex-1 flex-col items-center w-full">
-                    {children}
-                </div>
-            </div>
-        </>
-    );
+  return (
+    <>
+      <TeacherNavigationMenu />
+      <div className="flex flex-1 flex-row mt-4 w-full pl-4 pr-4">
+        <div className="overflow-x-hidden flex flex-1 flex-col items-center w-full">
+          {children}
+        </div>
+      </div>
+    </>
+  );
 }

@@ -121,7 +121,6 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -134,6 +133,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setError(null);
 
     // Basic client-side validation
@@ -167,12 +167,14 @@ export default function LoginPage() {
       console.error("Login error:", error);
       setError("Invalid credentials or server error.");
     }
+
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <div className="flex flex-col overflow-hidden md:flex-row w-full max-w-4xl bg-white rounded-lg shadow-md">
         {/* Image Section */}
+
         <div className="hidden md:block md:w-1/2 bg-green-600">
           <img
             src="/elearning_pic.jpg"
@@ -191,6 +193,7 @@ export default function LoginPage() {
             <div className="space-y-4">
               <div>
                 <Label
+
                   htmlFor="username"
                   className="mb-1 block text-sm font-medium text-gray-600"
                 >
@@ -203,11 +206,15 @@ export default function LoginPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   required
+
                 />
               </div>
 
               <div>
-                <Label htmlFor="password" className="mb-1 block text-sm font-medium text-gray-600">
+                <Label
+                  htmlFor="password"
+                  className="mb-1 block text-sm font-medium text-gray-600"
+                >
                   Password
                 </Label>
                 <Input
@@ -228,6 +235,7 @@ export default function LoginPage() {
               )}
             </div>
 
+
             <Button
               type="submit"
               className="w-full mt-6 bg-green-600 text-white hover:bg-green-700"
@@ -236,12 +244,15 @@ export default function LoginPage() {
             </Button>
 
             <div className="text-center mt-4">
-              <a href="#" className="text-green-600 text-sm hover:underline">Forgot password?</a>
+              <a href="#" className="text-green-600 text-sm hover:underline">
+                Forgot password?
+              </a>
             </div>
           </form>
 
           <p className="mt-4 text-sm text-center text-gray-600">
             Don't have an account?{" "}
+
             <a
               href="/signup"
               className="text-green-600 font-semibold hover:underline"
