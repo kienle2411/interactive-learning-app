@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { Button } from "./ui/button";
 
 export default function Header() {
   return (
@@ -15,6 +16,9 @@ export default function Header() {
         <div className="font-bold text-[24px] text-primary">
           My<span className="text-accent">Classes</span>
         </div>
+      </div>
+      <div>
+        <Button variant={"outline"}>Log Out</Button>
       </div>
     </div>
   );
