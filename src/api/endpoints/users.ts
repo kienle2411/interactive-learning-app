@@ -30,5 +30,19 @@ export const updateProfile = async (profileUpdateBody: ProfileUpdateBody) => {
       profileUpdateBody
     );
     return response;
-  } catch (error) {}
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error(
+          "Error during update profile: ",
+          error.response.data.message + ": " + error.response.data.errors[0]
+        );
+      } else {
+        console.error("Error with no response: ", error.message);
+      }
+    } else {
+      console.error("General error during update profile: ", error);
+    }
+    throw error;
+  }
 };

@@ -1,5 +1,5 @@
 "use client";
-import React, { FormEvent, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
-import { format, formatISO, startOfDay } from "date-fns";
+import { format, startOfDay } from "date-fns";
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
 import { ProfileUpdateBody } from "@/types/user-response";
 import {
@@ -109,8 +109,16 @@ export default function ProfileForm() {
       ) {
         console.log(values[key as keyof typeof values]);
         console.log(profile[key as keyof typeof profile]);
-        updatedProfile[key as keyof typeof updatedProfile] =
-          values[key as keyof typeof values];
+        if (
+          values[key as keyof typeof values] === "male" ||
+          values[key as keyof typeof values] === "female"
+        ) {
+          updatedProfile[key as keyof typeof updatedProfile] =
+            values[key as keyof typeof values].toUpperCase();
+        } else {
+          updatedProfile[key as keyof typeof updatedProfile] =
+            values[key as keyof typeof values];
+        }
       }
     });
     console.log(updatedProfile);
@@ -118,6 +126,11 @@ export default function ProfileForm() {
   }
 
   const handleReset = () => {};
+
+  const handleSelectChange = (value: string) => {
+    form.setValue("gender", value);
+    console.log(form.getValues("gender"));
+  };
 
   return (
     <Card className="w-full max-w-md mx-auto p-6 border-none shadow-none pt-10">
@@ -217,15 +230,13 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>Gender</FormLabel>
                   <FormControl>
-                    <Select>
+                    <Select onValueChange={handleSelectChange}>
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
-                            userProfile.data?.gender
-                              ? userProfile.data.gender
-                                  .charAt(0)
-                                  .toUpperCase() +
-                                userProfile.data.gender.slice(1).toLowerCase()
+                            field.value
+                              ? field.value.charAt(0).toUpperCase() +
+                                field.value.slice(1).toLowerCase()
                               : "Select gender"
                           }
                         />

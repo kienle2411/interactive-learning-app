@@ -18,7 +18,9 @@ export const useUpdateProfile = () => {
         queryKey: ["profile"],
       });
     },
-    onError: (error) => {},
+    onError: (error) => {
+      throw error;
+    },
     onSettled: () => {},
   });
 };
