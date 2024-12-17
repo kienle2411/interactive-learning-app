@@ -18,7 +18,7 @@ export const useSignIn = (router: AppRouterInstance) => {
 export const useSignUp = (router: AppRouterInstance) => {
   return useMutation({
     mutationFn: signUp,
-    onSuccess: (data) => {
+    onSuccess: () => {
       router.push("/login");
     },
     onError: (error) => {
