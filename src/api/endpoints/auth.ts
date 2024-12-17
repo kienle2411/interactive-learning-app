@@ -1,6 +1,7 @@
 import axios from "axios";
 import axiosClient from "../axios-client";
 import Cookies from "js-cookie";
+import { SignUpBody } from "@/types/auth";
 
 export const signIn = async (data: { username: string; password: string }) => {
   try {
@@ -41,7 +42,24 @@ export const signIn = async (data: { username: string; password: string }) => {
   }
 };
 
-export const refreshToken = async () => {
-  const response = await axiosClient.post("/auth/refresh");
-  return response.data;
+export const signUp = async (data: Partial<SignUpBody>) => {
+  try {
+    const response = await axiosClient.post("/auth/signup", data);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        console.error(
+          "Error during sign up: ",
+          error.response.data.message + ": " + error.response.data.errors[0]
+        );
+      } else {
+        console.error("Error with no response: ", error.message);
+      }
+    } else {
+      console.error("General error during sign up: ", error);
+    }
+    throw error;
+  }
 };
