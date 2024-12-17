@@ -4,16 +4,14 @@ import { Button } from "./ui/button";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
 
-
 export default function Header() {
-
   const router = useRouter();
 
   const handleOnClick = () => {
     try {
       Cookies.remove("accessToken");
       Cookies.remove("refreshToken");
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
       console.log("Error log out: ", error);
     }
@@ -34,7 +32,9 @@ export default function Header() {
         </div>
       </div>
       <div>
-        <Button onClick={handleOnClick} variant={"outline"}>Log Out</Button>
+        <Button onClick={handleOnClick} variant={"outline"}>
+          Log Out
+        </Button>
       </div>
     </div>
   );
