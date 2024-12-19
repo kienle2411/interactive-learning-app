@@ -273,7 +273,7 @@ const ClassesManagement: React.FC = () => {
             classroomName: className,
             description: classDescription,
             capacity: 50,
-            classroomCode: `CLASS${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
+            classroomCode: `CLS${Math.random().toString(36).substr(2, 7).toUpperCase()}`,
         };
 
         try {

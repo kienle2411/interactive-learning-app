@@ -57,3 +57,16 @@ export const createClass = async (newClass: Omit<Classroom, "id" | "createdAt" |
         throw error;
     }
 }
+
+export const updateClass = async (id: string, updatedClass: Partial<Omit<Classroom, "id" | "createdAt" | "updatedAt" | "deletedAt" | "teacherId">>): Promise<Classroom> => {
+    try {
+        const response = await axiosClient.patch(`/classrooms/${id}`, updatedClass);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("API Error: ", error.response?.data);
+        }
+        console.error("Error updating class: ", error);
+        throw error;
+    }
+}
