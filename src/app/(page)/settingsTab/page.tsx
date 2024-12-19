@@ -107,8 +107,6 @@ export default function ProfileForm() {
         values[key as keyof typeof values] !==
         profile[key as keyof typeof userProfile]
       ) {
-        console.log(values[key as keyof typeof values]);
-        console.log(profile[key as keyof typeof profile]);
         if (
           values[key as keyof typeof values] === "male" ||
           values[key as keyof typeof values] === "female"
@@ -121,7 +119,6 @@ export default function ProfileForm() {
         }
       }
     });
-    console.log(updatedProfile);
     updateProfile(updatedProfile);
   }
 
