@@ -4,11 +4,22 @@
     "react/no-unescaped-entities": "off",
     "@next/next/no-page-custom-font": "off"
   },
-  "extends": ["next/core-web-vitals", "next/typescript"],
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
   "overrides": [
     {
-      "files": ["src/**/*.js", "src/**/*.jsx", "src/**/*.ts", "src/**/*.tsx"],
-      "excludedFiles": ["node_modules/**/*", "src/components/**/*.tsx"]
+      "files": [
+        "src/**/*.js",
+        "src/**/*.jsx",
+        "src/**/*.ts",
+        "src/**/*.tsx"
+      ],
+      "excludedFiles": [
+        "node_modules/**/*",
+        "src/components/**/*.tsx"
+      ]
     }
   ]
 }

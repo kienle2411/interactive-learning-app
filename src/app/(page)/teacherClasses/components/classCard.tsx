@@ -6,12 +6,13 @@ import { Copy } from "lucide-react";
 
 interface ClassCardProps {
     id: string; // Unique ID for the class
+    description: string;
     className: string;
     participants: number;
     code: string;
 }
 
-const ClassCard: React.FC<ClassCardProps> = ({ id, className, participants, code }) => {
+const ClassCard: React.FC<ClassCardProps> = ({ id, className, description, participants, code }) => {
     const router = useRouter(); // Initialize router
 
     const handleCopy = () => {
@@ -37,8 +38,9 @@ const ClassCard: React.FC<ClassCardProps> = ({ id, className, participants, code
             </CardHeader>
             <CardContent className="card-content pt-2 pb-2 pl-4">
                 <h3 className="text-xl font-bold">{className}</h3>
-                <p>Participants: {participants}</p>
-                <p>
+                <p className="font-semibold">{description}</p>
+                <p className="text-sm">Participants: {participants}</p>
+                <p className="text-sm">
                     Code: {code}
                     <button className="ml-2" onClick={handleCopy}>
                         <Copy size={16} />
