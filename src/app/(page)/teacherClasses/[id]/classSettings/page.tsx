@@ -1,11 +1,54 @@
+"use client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { usePathname } from 'next/navigation';
+import { fetchTeacherClasses, updateClass } from '@/api/endpoints/teacherClasses';
+
 
 export default function ClassSetting() {
+    const [className, setClassName] = React.useState("");
+    const [classDescription, setClassDescription] = React.useState("");
+    const [capacity, setCapacity] = React.useState<number>(0);
+    const [classroomCode, setClassroomCode] = React.useState("");
+
+    const pathname = usePathname();
+    const id = pathname.split('/')[2];
+
+    // Load thông tin lớp học khi mở trang
+    useEffect(() => {
+        const loadClassDetails = async () => {
+            try {
+                const response = await fetchTeacherClasses();
+                const classDetails = response.data?.data.find((cls) => cls.id === id);
+                if (classDetails) {
+                    setClassName(classDetails.classroomName);
+                    setClassDescription(classDetails.description);
+                    setCapacity(classDetails.capacity);
+                    setClassroomCode(classDetails.classroomCode);
+                }
+            } catch (error) {
+                console.error("Error loading class details:", error);
+            }
+        };
+        loadClassDetails();
+    }, [id]);
+
+
+    const handleEditSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        try {
+            await updateClass(id, { classroomName: className, description: classDescription, capacity, classroomCode });
+            alert("Class updated successfully!");
+        } catch (error) {
+            console.error("Error updating class:", error);
+            alert("Failed to update class.");
+        }
+    }
+
     return (
         <div className='w-full flex flex-col p-10 pt-0'>
             <div className='pt-10 pb-4'>
@@ -22,19 +65,36 @@ export default function ClassSetting() {
                                 Change the name of your Class
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid grid-cols-4 items-center gap-4">
-                                <Label htmlFor="name" className="text-right">
-                                    Class Name
-                                </Label>
-                                <Input
-                                    id="name"
-                                    className="col-span-3" />
+                        <form onSubmit={handleEditSubmit}>
+                            <div className="grid gap-4 py-4">
+                                <div className="grid gap-4">
+                                    <Label htmlFor="name" className="text-left">
+                                        Class Name
+                                    </Label>
+                                    <Input
+                                        id="name"
+                                        required
+                                        value={className}
+                                        onChange={(e) => setClassName(e.target.value)}
+                                        placeholder="Enter class name"
+                                    />
+                                </div>
+                                <div className="grid gap-4">
+                                    <Label htmlFor="description" className="text-left">
+                                        Class Description
+                                    </Label>
+                                    <Input
+                                        id="description"
+                                        value={classDescription}
+                                        onChange={(e) => setClassDescription(e.target.value)}
+                                        placeholder="Enter class description (Optional)"
+                                    />
+                                </div>
                             </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit">Save changes</Button>
-                        </DialogFooter>
+                            <DialogFooter>
+                                <Button type="submit">Save changes</Button>
+                            </DialogFooter>
+                        </form>
                     </DialogContent>
                 </Dialog>
             </div>
