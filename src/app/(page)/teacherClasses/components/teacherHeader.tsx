@@ -55,62 +55,61 @@
 
 // export default TeacherNavigationMenu;
 
-
 "use client";
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 interface NavigationItem {
-    name: string;
-    href: string;
+  name: string;
+  href: string;
 }
 
 const TeacherNavigationMenu: React.FC = () => {
-    const router = useRouter(); // Sử dụng router của Next.js
-    const params = useParams(); // Lấy params từ URL
-    const { id } = params; // Lấy `id` từ params
-    const [activeItem, setActiveItem] = useState(`/teacherClasses/${id}`);
+  const router = useRouter(); // Sử dụng router của Next.js
+  const params = useParams(); // Lấy params từ URL
+  const { id } = params; // Lấy `id` từ params
+  const [activeItem, setActiveItem] = useState(`/teacherClasses/${id}`);
 
-    const navigation: NavigationItem[] = [
-        { name: "Participant", href: `/teacherClasses/${id}` },
-        { name: "Live Class", href: `/products` },
-        { name: "Groups", href: `/teacherClasses/${id}/classGroup` },
-        { name: "Materials", href: `/teacherClasses/${id}/classMaterials` },
-        { name: "Reports", href: `/teacherClasses/${id}/classReports` },
-        { name: "Settings", href: `/teacherClasses/${id}/classSettings` },
-    ];
+  const navigation: NavigationItem[] = [
+    { name: "Participant", href: `/teacherClasses/${id}` },
+    { name: "Live Class", href: `/teacherClasses/${id}/classSessions` },
+    { name: "Groups", href: `/teacherClasses/${id}/classGroup` },
+    { name: "Materials", href: `/teacherClasses/${id}/classMaterials` },
+    { name: "Reports", href: `/teacherClasses/${id}/classReports` },
+    { name: "Settings", href: `/teacherClasses/${id}/classSettings` },
+  ];
 
-    const classNames = (...classes: string[]) => {
-        return classes.filter(Boolean).join(" ");
-    };
+  const classNames = (...classes: string[]) => {
+    return classes.filter(Boolean).join(" ");
+  };
 
-    const handleClick = (href: string) => {
-        setActiveItem(href);
-        router.push(href); // Điều hướng tới URL mới
-    };
+  const handleClick = (href: string) => {
+    setActiveItem(href);
+    router.push(href); // Điều hướng tới URL mới
+  };
 
-    return (
-        <div className="w-full border-b border-gray-300 overflow-x-auto pt-2">
-            <div className="flex h-14 items-center px-4 min-w-max">
-                <nav className="flex items-center space-x-6">
-                    {navigation.map((item) => (
-                        <button
-                            key={item.href}
-                            onClick={() => handleClick(item.href)}
-                            className={classNames(
-                                "flex items-center text-sm font-medium transition-colors hover:text-green-600 h-14 border-b-2 pl-2 pr-2",
-                                activeItem === item.href
-                                    ? "border-green-600 text-green-600"
-                                    : "border-transparent text-gray-500 hover:border-gray-300"
-                            )}
-                        >
-                            {item.name}
-                        </button>
-                    ))}
-                </nav>
-            </div>
-        </div>
-    );
+  return (
+    <div className="w-full border-b border-gray-300 overflow-x-auto pt-2">
+      <div className="flex h-14 items-center px-4 min-w-max">
+        <nav className="flex items-center space-x-6">
+          {navigation.map((item) => (
+            <button
+              key={item.href}
+              onClick={() => handleClick(item.href)}
+              className={classNames(
+                "flex items-center text-sm font-medium transition-colors hover:text-green-600 h-14 border-b-2 pl-2 pr-2",
+                activeItem === item.href
+                  ? "border-green-600 text-green-600"
+                  : "border-transparent text-gray-500 hover:border-gray-300"
+              )}
+            >
+              {item.name}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
+  );
 };
 
 export default TeacherNavigationMenu;
