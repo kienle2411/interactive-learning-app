@@ -31,7 +31,8 @@
 
 import axiosClient from "@/api/axios-client";
 import { ApiResponse } from "@/types/response-types";
-import { ClassroomData } from "@/types/class-response";
+import { ClassroomData, Classroom } from "@/types/class-response";
+import axios from "axios";
 
 // Fetch danh sách lớp học của giáo viên
 export const fetchTeacherClasses = async (): Promise<ApiResponse<ClassroomData>> => {
@@ -43,3 +44,16 @@ export const fetchTeacherClasses = async (): Promise<ApiResponse<ClassroomData>>
         throw error; // Ném lỗi lên để các hàm gọi phía trên có thể xử lý
     }
 };
+
+export const createClass = async (newClass: Omit<Classroom, "id" | "createdAt" | "updatedAt" | "deletedAt" | "teacherId">): Promise<Classroom> => {
+    try {
+        const response = await axiosClient.post("/classrooms", newClass);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("API Error: ", error.response?.data);  // Log phản hồi lỗi từ server
+        }
+        console.error("Error creating class: ", error);
+        throw error;
+    }
+}

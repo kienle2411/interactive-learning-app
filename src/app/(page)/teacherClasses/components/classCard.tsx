@@ -39,7 +39,7 @@ const ClassCard: React.FC<ClassCardProps> = ({ id, className, description, parti
             <CardContent className="card-content pt-2 pb-2 pl-4">
                 <h3 className="text-xl font-bold">{className}</h3>
                 <p className="font-semibold">{description}</p>
-                <p className="text-sm">Participants: {participants}</p>
+                {/* <p className="text-sm">Participants: {participants}</p> */}
                 <p className="text-sm">
                     Code: {code}
                     <button className="ml-2" onClick={handleCopy}>
