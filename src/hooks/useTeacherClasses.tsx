@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { fetchTeacherClasses } from "@/api/endpoints/teacherClasses";
 import { Classroom } from "@/types/class-response";
 import { updateClass as apiUpdateClass } from "@/api/endpoints/teacherClasses";
+import { deleteClassroom as apiDeleteClassroom } from "@/api/endpoints/teacherClasses";
 
 // Custom Hook để lấy danh sách lớp học
 export const useTeacherClasses = () => {
@@ -13,7 +14,10 @@ export const useTeacherClasses = () => {
         try {
             const response = await fetchTeacherClasses();
             if (response && response.data) {
-                setClasses(response.data.data);
+                //lọc các lớp chưa bị deleted
+                const filteredClasses = response.data.data.filter((classroom) => classroom.deletedAt === null);
+                setClasses(filteredClasses);
+                // setClasses(response.data.data);
             } else {
                 setError("No data available.");
             }
@@ -44,12 +48,25 @@ export const useTeacherClasses = () => {
         }
     }
 
+    const deleteClassroom = async (id: string) => {
+        try {
+            await apiDeleteClassroom(id);
+            setClasses((prevClasses) => prevClasses.filter((cls) => cls.id !== id));
+            alert("Class deleted successfully!");
+        } catch (error) {
+            console.error("Failed to delete class:", error);
+            alert("Failed to delete class.");
+            throw error;
+        }
+    }
+
     return {
         classes,
         loading,
         error,
         refetchClasses: loadClasses,  // Cung cấp hàm làm mới danh sách lớp học
         updateClass,
+        deleteClassroom,
     };
 };
 

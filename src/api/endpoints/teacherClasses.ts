@@ -70,3 +70,16 @@ export const updateClass = async (id: string, updatedClass: Partial<Omit<Classro
         throw error;
     }
 }
+
+export const deleteClassroom = async (id: string) => {
+    try {
+        const response = await axiosClient.delete(`/classrooms/${id}`);
+        return response.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("API Error: ", error.response?.data);
+        }
+        console.error("Error updating class: ", error);
+        throw error;
+    }
+}
