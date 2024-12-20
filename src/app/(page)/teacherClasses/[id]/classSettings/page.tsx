@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label'
 import React, { useEffect } from 'react'
 import { usePathname } from 'next/navigation';
 import { fetchTeacherClasses, updateClass } from '@/api/endpoints/teacherClasses';
+import { useTeacherClasses } from "@/hooks/useTeacherClasses";
+import { useRouter } from "next/navigation";
 
 
 export default function ClassSetting() {
@@ -17,6 +19,10 @@ export default function ClassSetting() {
 
     const pathname = usePathname();
     const id = pathname.split('/')[2];
+
+    const { deleteClassroom } = useTeacherClasses();
+
+    const router = useRouter();
 
     // Load thông tin lớp học khi mở trang
     useEffect(() => {
@@ -48,6 +54,17 @@ export default function ClassSetting() {
             alert("Failed to update class.");
         }
     }
+
+
+    const handleDeleteClassroom = async () => {
+        try {
+            await deleteClassroom(id);
+            router.push(`/teacherClasses`);
+
+        } catch (err) {
+            console.error("Error deleting class:", err);
+        }
+    };
 
     return (
         <div className='w-full flex flex-col p-10 pt-0'>
@@ -115,7 +132,7 @@ export default function ClassSetting() {
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                             <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction>Continue</AlertDialogAction>
+                            <AlertDialogAction onClick={handleDeleteClassroom}>Continue</AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
