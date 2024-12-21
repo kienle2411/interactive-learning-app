@@ -3,6 +3,8 @@ import { fetchTeacherClasses } from "@/api/endpoints/teacherClasses";
 import { Classroom } from "@/types/class-response";
 import { updateClass as apiUpdateClass } from "@/api/endpoints/teacherClasses";
 import { deleteClassroom as apiDeleteClassroom } from "@/api/endpoints/teacherClasses";
+import { useQuery } from "@tanstack/react-query";
+import { getClassById } from "@/api/endpoints/teacherClasses";
 
 // Custom Hook để lấy danh sách lớp học
 export const useTeacherClasses = () => {
@@ -72,4 +74,19 @@ export const useTeacherClasses = () => {
 
 
 
+export const useClassById = (id: string) => {
+    const {
+        data: classroom,
+        isLoading,
+        isError,
+        error,
+        refetch,
+    } = useQuery({
+        queryKey: ["classroom", id], // Khóa truy vấn
+        queryFn: () => getClassById(id), // Hàm fetch API
+        enabled: !!id, // Chỉ kích hoạt query nếu `id` không null
+        retry: 2, // Số lần thử lại khi query thất bại
+    });
 
+    return { classroom, isLoading, isError, error, refetch };
+};

@@ -134,6 +134,8 @@ import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useClassById } from '@/hooks/useTeacherClasses';
+import ThreeDotsWave from "@/components/ui/three-dot-wave";
 
 export default function InvoiceTable() {
     const [open, setOpen] = useState(false);
@@ -149,6 +151,28 @@ export default function InvoiceTable() {
     const [students, setStudents] = useState<
         { id: string; student: string; group: string; score: number }[]
     >([]);
+
+    const { classroom, isLoading, isError, error, refetch } = useClassById(id as string);
+
+
+    if (isLoading) {
+        // return <div>Loading class details...</div>;
+        return <ThreeDotsWave />;
+    }
+
+    if (isError) {
+        return (
+            <div>
+                <p>Error loading class details: {error?.message || "Unknown error"}</p>
+                <button onClick={() => refetch()}>Retry</button>
+            </div>
+        );
+    }
+
+    if (!classroom) {
+        return <div>No class details found.</div>;
+    }
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -300,7 +324,7 @@ export default function InvoiceTable() {
 
             <Table>
                 <TableCaption>
-                    There are {students.length} students in {id} class
+                    There are {students.length} students in {classroom.classroomName} class
                 </TableCaption>
                 <TableHeader className='bg-slate-200 text-lg'>
                     <TableRow>
