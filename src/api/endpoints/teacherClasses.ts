@@ -83,3 +83,16 @@ export const deleteClassroom = async (id: string) => {
         throw error;
     }
 }
+
+export const getClassById = async (id: string): Promise<Classroom> => {
+    try {
+        const response = await axiosClient.get(`/classrooms/${id}`);
+        return response.data.data.data;
+    } catch (error) {
+        if (axios.isAxiosError(error)) {
+            console.error("API Error: ", error.response?.data);
+        }
+        console.error("Error updating class: ", error);
+        throw error;
+    }
+}
