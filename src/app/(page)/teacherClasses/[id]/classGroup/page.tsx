@@ -16,8 +16,9 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { Label } from '@radix-ui/react-label';
 import { Input } from '@/components/ui/input';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useClassById } from '@/hooks/useTeacherClasses';
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
+import { useTeacherGroup } from '@/hooks/useTeacherGroup';
+import { useClassById } from '@/hooks/useTeacherClasses';
 
 export default function GroupTable() {
     const [open, setOpen] = useState(false);
@@ -30,29 +31,23 @@ export default function GroupTable() {
     const pathname = usePathname();
     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
     const [group, setGroup] = useState("");
-    const [groups, setGroups] = useState<
-        { id: string; group: string; score: number }[]
-    >([]);
 
-    const { classroom, isLoading, isError, error, refetch } = useClassById(id as string);
+    const { classroom } = useClassById(id as string);
 
 
-    if (isLoading) {
-        // return <div>Loading class details...</div>;
+    const { groups, loading, error } = useTeacherGroup(id as string);
+
+
+    if (loading) {
         return <ThreeDotsWave />;
     }
 
-    if (isError) {
-        return (
-            <div>
-                <p>Error loading class details: {error?.message || "Unknown error"}</p>
-                <button onClick={() => refetch()}>Retry</button>
-            </div>
-        );
+    if (error) {
+        return <div>Error: {error}</div>;
     }
 
-    if (!classroom) {
-        return <div>No class details found.</div>;
+    if (!groups) {
+        return <div>No group details found.</div>;
     }
 
 
@@ -60,30 +55,30 @@ export default function GroupTable() {
         e.preventDefault();
         if (!group.trim()) return; // Prevent adding empty groups
 
-        const newStudent = {
-            id: (groups.length + 1).toString(), // Sequential ID
-            group: group,
-            score: 0,
-        };
-        setGroups([...groups, newStudent]);
+        // const newStudent = {
+        //     id: (groups.length + 1).toString(), // Sequential ID
+        //     group: group,
+        //     score: 0,
+        // };
+        // setGroups([...groups, newStudent]);
         setGroup("");
         setOpen(false);
     };
 
-    const openEditGroupDialog = (student: { id: string; group: string; score: number }) => {
-        setCurrentGroup(student);
-        setEditGroupOpen(true);
-    };
+    // const openEditGroupDialog = (student: { id: string; group: string; score: number }) => {
+    //     setCurrentGroup(student);
+    //     setEditGroupOpen(true);
+    // };
 
     const handleUpdateGroup = (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentGroup) return;
 
-        setGroups(groups.map(std =>
-            std.id === currentGroup.id
-                ? { ...std, group: currentGroup.group }
-                : std
-        ));
+        // setGroups(groups.map(std =>
+        //     std.id === currentGroup.id
+        //         ? { ...std, group: currentGroup.group }
+        //         : std
+        // ));
         setEditGroupOpen(false);
     };
 
@@ -94,7 +89,7 @@ export default function GroupTable() {
 
     const handleDelete = () => {
         if (studentToDelete) {
-            setGroups(groups.filter(std => std.id !== studentToDelete));
+            // setGroups(groups.filter(std => std.id !== studentToDelete));
             setDeleteConfirmOpen(false);
             setStudentToDelete(null);
         }
@@ -181,27 +176,28 @@ export default function GroupTable() {
 
             <Table>
                 <TableCaption>
-                    There are {groups.length} groups in {classroom.classroomName} class
+                    There are {groups.length} groups in {classroom?.classroomName} class
                 </TableCaption>
                 <TableHeader className='bg-slate-200 text-lg'>
                     <TableRow>
                         <TableHead className="text-center font-bold text-black">No.</TableHead>
                         <TableHead className="text-center font-bold text-black">Group Name</TableHead>
-                        <TableHead className="text-center font-bold text-black">Total Score</TableHead>
+                        {/* <TableHead className="text-center font-bold text-black">Total Score</TableHead> */}
                         <TableHead className="text-center font-bold text-black">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody className='text-base'>
-                    {groups.map((std) => (
+                    {groups.map((std, index) => (
                         <TableRow key={std.id}>
-                            <TableCell className="text-center">{std.id}</TableCell>
-                            <TableCell className="text-center">{std.group}</TableCell>
-                            <TableCell className="text-center">{std.score}</TableCell>
+                            <TableCell className="text-center">{index + 1}</TableCell>
+                            <TableCell className="text-center">{std.groupName}</TableCell>
+                            {/* <TableCell className="text-center">{std.score}</TableCell> */}
                             <TableCell className="text-center">
                                 <Button className='m-2'
                                     variant="secondary"
                                     size="sm"
-                                    onClick={() => openEditGroupDialog(std)}>
+                                // onClick={() => openEditGroupDialog(std)}
+                                >
                                     Update
                                 </Button>
                                 <Button

@@ -18,38 +18,38 @@ import StudentClassCard from "./components/stdClassCard";
 export default function ClassesManagement() {
   const [classCode, setClassCode] = useState("");
   const [classes] = useState<
-    { id: string; className: string; participants: number }[]
+    { id: string; className: string; description: string }[]
   >([
     {
       id: "1",
       className: "Math Class",
-      participants: 30,
+      description: "30",
     },
     {
       id: "2",
       className: "English Class",
-      participants: 45,
+      description: "30",
     },
 
     {
       id: "3",
       className: "Math Class",
-      participants: 30,
+      description: "30",
     },
     {
       id: "4",
       className: "English Class",
-      participants: 45,
+      description: "30",
     },
     {
       id: "5",
       className: "Math Class",
-      participants: 30,
+      description: "30",
     },
     {
       id: "6",
       className: "English Class",
-      participants: 45,
+      description: "30",
     },
   ]);
 
@@ -95,7 +95,7 @@ export default function ClassesManagement() {
               key={cls.id}
               id={cls.id}
               className={cls.className}
-              participants={cls.participants}
+              description={cls.description}
             />
           ))}
         </div>
