@@ -1,4 +1,4 @@
-import { fetchClassGroup } from "@/api/endpoints/group";
+import { addGroup, deleteGroup, fetchClassGroup, updateGroup } from "@/api/endpoints/group";
 import { Group } from "@/types/group-response";
 import { useState, useEffect } from "react";
 
@@ -31,10 +31,40 @@ export const useTeacherGroup = (id: string) => {
         loadGroups();
     }, []);
 
+    const createGroup = async (groupName: string) => {
+        try {
+            await addGroup(id, groupName);
+            await loadGroups(); // Refresh groups after adding
+        } catch (error) {
+            console.error("Error adding group:", error);
+        }
+    };
+
+    const editGroup = async (groupId: string, groupName: string) => {
+        try {
+            await updateGroup(groupId, groupName);
+            await loadGroups(); // Refresh groups after editing
+        } catch (error) {
+            console.error("Error updating group:", error);
+        }
+    };
+
+    const removeGroup = async (groupId: string) => {
+        try {
+            await deleteGroup(groupId);
+            await loadGroups(); // Refresh groups after deleting
+        } catch (error) {
+            console.error("Error deleting group:", error);
+        }
+    };
+
     return {
         groups,
         loading,
         error,
-        refetchGroups: loadGroups,  // Cung cấp hàm làm mới danh sách lớp học
+        refetchGroups: loadGroups,
+        createGroup,
+        editGroup,
+        removeGroup,
     };
 }
