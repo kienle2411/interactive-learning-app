@@ -6,13 +6,13 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 interface ClassCardProps {
   id: string; // Unique ID for the class
   className: string;
-  participants: number;
+  description: string;
 }
 
 const StudentClassCard: React.FC<ClassCardProps> = ({
   id,
   className,
-  participants,
+  description,
 }) => {
   const router = useRouter(); // Initialize router
 
@@ -34,7 +34,7 @@ const StudentClassCard: React.FC<ClassCardProps> = ({
       </CardHeader>
       <CardContent className="card-content pt-2 pb-2 pl-4">
         <span className="text-lg font-bold">{className}</span>
-        <span>Participants: {participants}</span>
+        <span className="font-semibold">{description}</span>
       </CardContent>
     </Card>
   );

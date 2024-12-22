@@ -10,10 +10,11 @@ export interface ProfileData {
   email: string;
   phone: string;
   school: string;
-  gender: "MALE" | "FEMALE" | "ORTHER";
+  gender: "MALE" | "FEMALE" | "OTHER";
   profileDescription: string | null;
   mediaId: string;
   profilePicture: MediaData;
+  roleId: string;
 }
 
 export interface ProfileUpdateBody {
@@ -25,6 +26,7 @@ export interface ProfileUpdateBody {
   school?: string;
   gender?: string;
   profileDescription?: string;
+  roleId?: string;
 }
 
 export type ProfileResponse = ApiResponse<ProfileData>;
