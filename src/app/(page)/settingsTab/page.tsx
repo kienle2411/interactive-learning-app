@@ -47,13 +47,13 @@ export default function ProfileForm() {
     resolver: zodResolver(formSchema),
     defaultValues: userProfile?.data
       ? {
-          firstName: userProfile.data.firstName,
-          lastName: userProfile.data.lastName,
-          dateOfBirth: userProfile.data.dateOfBirth,
-          gender: userProfile.data.gender,
-          school: userProfile.data.school,
-          profileDescription: userProfile.data.profileDescription || "",
-        }
+        firstName: userProfile.data.firstName,
+        lastName: userProfile.data.lastName,
+        dateOfBirth: userProfile.data.dateOfBirth,
+        gender: userProfile.data.gender,
+        school: userProfile.data.school,
+        profileDescription: userProfile.data.profileDescription || "",
+      }
       : {},
   });
 
@@ -122,7 +122,7 @@ export default function ProfileForm() {
     updateProfile(updatedProfile);
   }
 
-  const handleReset = () => {};
+  const handleReset = () => { };
 
   const handleSelectChange = (value: string) => {
     form.setValue("gender", value);
@@ -233,7 +233,7 @@ export default function ProfileForm() {
                           placeholder={
                             field.value
                               ? field.value.charAt(0).toUpperCase() +
-                                field.value.slice(1).toLowerCase()
+                              field.value.slice(1).toLowerCase()
                               : "Select gender"
                           }
                         />
