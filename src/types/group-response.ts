@@ -1,6 +1,7 @@
 export interface Group {
     id: string;
     groupName: string;
+    totalScore: number;
     createdAt: string;
     updatedAt: string;
     deletedAt: string | null;

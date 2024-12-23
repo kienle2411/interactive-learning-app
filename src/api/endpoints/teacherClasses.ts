@@ -87,7 +87,7 @@ export const deleteClassroom = async (id: string) => {
 export const getClassById = async (id: string): Promise<Classroom> => {
     try {
         const response = await axiosClient.get(`/classrooms/${id}`);
-        return response.data.data.data;
+        return response.data.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
             console.error("API Error: ", error.response?.data);
