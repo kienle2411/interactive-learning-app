@@ -21,30 +21,18 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
-// import {
-//   AlertDialog,
-//   AlertDialogAction,
-//   AlertDialogCancel,
-//   AlertDialogContent,
-//   AlertDialogDescription,
-//   AlertDialogFooter,
-//   AlertDialogHeader,
-//   AlertDialogTitle,
-// } from "@/components/ui/alert-dialog";
 import { useClassById } from '@/hooks/useTeacherClasses';
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useUploadFile } from "@/hooks/useDocfiles";
 import { File, X } from "lucide-react";
-import { useCreateMaterial, useTeacherMaterial } from "@/hooks/useMaterials";
+import { useCreateMaterial, useTeacherMaterial, useUpdateMaterial } from "@/hooks/useMaterials";
 import { Material } from "@/types/material-response";
 
 export default function MaterialTable() {
   const [open, setOpen] = useState(false);
   const [editMaterialOpen, setEditMaterialOpen] = useState(false);
   const [currentMaterial, setCurrentMaterial] = useState<Material | null>(null);
-  // const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
-  // const [materialToDelete, setMaterialToDelete] = useState<string | null>(null);
 
   const pathname = usePathname();
   const id = pathname.split("/")[2];
@@ -60,6 +48,7 @@ export default function MaterialTable() {
   const { classroom, isLoading, isError, refetch } = useClassById(id as string);
   const { materials, loading, error, refetchMaterials } = useTeacherMaterial(id as string);
 
+  const { mutate } = useUpdateMaterial(id);
 
   const { mutate: createMaterial } = useCreateMaterial(
     id as string,
@@ -138,29 +127,33 @@ export default function MaterialTable() {
   };
 
 
-  const handleUpdateGroup = (e: React.FormEvent) => {
+  const handleUpdateMaterial = (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentMaterial) return;
 
+    if (!currentMaterial.title.trim() || !currentMaterial.description.trim()) return;
+
     if (currentMaterial.url && !isValidUrl(currentMaterial.url)) {
-      alert("Invalid URL. Please enter a valid web address.");
+      alert("Invalid URL. Please enter a valid URL.");
       return;
     }
 
-    setEditMaterialOpen(false);
+    mutate(
+      { id: currentMaterial.id, newMaterial: currentMaterial },
+      {
+        onSuccess: () => {
+          setEditMaterialOpen(false);
+        },
+        onError: (error) => {
+          console.error("Failed to update material:", error);
+        },
+      }
+    );
   };
 
-  // const confirmDelete = (id: string) => {
-  //   setMaterialToDelete(id);
-  //   setDeleteConfirmOpen(true);
-  // };
 
-  // const handleDelete = () => {
-  //   if (materialToDelete) {
-  //     setDeleteConfirmOpen(false);
-  //     setMaterialToDelete(null);
-  //   }
-  // };
+
+
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -286,7 +279,7 @@ export default function MaterialTable() {
           <DialogHeader>
             <DialogTitle>Update Material</DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleUpdateGroup}>
+          <form onSubmit={handleUpdateMaterial}>
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
                 <Label htmlFor="materialName">Material Name</Label>

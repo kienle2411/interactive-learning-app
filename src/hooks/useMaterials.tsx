@@ -1,7 +1,8 @@
-import { createMaterial, downloadDocFile, fetchClassMaterials } from "@/api/endpoints/materials";
+import { createMaterial, downloadDocFile, fetchClassMaterials, updateMaterial } from "@/api/endpoints/materials";
 import { Material, MaterialInput } from "@/types/material-response";
 import { useEffect, useState } from "react";
 import { useToast } from "./use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export const useTeacherMaterial = (id: string) => {
     const [materials, setMaterials] = useState<Material[]>([]);  // Lưu danh sách lớp học
@@ -71,3 +72,50 @@ export const useCreateMaterial = (classroomId: string, onSuccess?: () => void) =
 };
 
 
+export const useTeacherMaterial_tanstack = (id: string) => {
+    const { data, isLoading, isError, refetch } = useQuery({
+        queryKey: ["classMaterials", id],
+        queryFn: async () => {
+            const response = await fetchClassMaterials(id);
+            if (!response || !response.data) {
+                throw new Error("No data available.");
+            }
+            return response.data.data; // Trả về danh sách lớp học
+        },
+    });
+
+    return {
+        materials: data || [],
+        loading: isLoading,
+        error: isError,
+        refetchMaterials: refetch,
+    };
+};
+
+
+export const useUpdateMaterial = (classroomId: string) => {
+    const queryClient = useQueryClient();
+    const { toast } = useToast();
+
+    const mutation = useMutation({
+        mutationFn: (variables: { id: string; newMaterial: MaterialInput }) =>
+            updateMaterial(variables.id, variables.newMaterial),
+        onSuccess: () => {
+            toast({
+                title: "Success",
+                description: "Material updated successfully",
+            });
+            // Refetch the updated materials list for the classroom
+            queryClient.invalidateQueries({ queryKey: ["classMaterials", classroomId] });
+        },
+        onError: () => {
+            toast({
+                title: "Error",
+                description: "Failed to update material",
+                variant: "destructive",
+            });
+        },
+    });
+
+    return mutation;
+};

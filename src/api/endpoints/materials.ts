@@ -12,6 +12,28 @@ export const fetchClassMaterials = async (id: string): Promise<ApiResponse<Mater
     }
 }
 
+export const updateMaterial = async (id: string, newMaterial: MaterialInput): Promise<MaterialInput> => {
+    try {
+        const formData = new FormData();
+
+        formData.append("title", newMaterial.title);
+        formData.append("description", newMaterial.description);
+        if (newMaterial.url) {
+            formData.append("url", newMaterial.url);
+        }
+        if (newMaterial.file) {
+            formData.append("file", newMaterial.file);
+        }
+        const response = await axiosClient.patch(`/materials/${id}`, formData, {
+            headers: { "Content-Type": "multipart/form-data" },
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching materials: ", error);
+        throw error;
+    }
+}
+
 export const downloadDocFile = async (docFileId: string): Promise<Blob> => {
     try {
         const response = await axiosClient.get(`/docfiles/${docFileId}/download`, {
