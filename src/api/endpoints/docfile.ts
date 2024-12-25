@@ -27,3 +27,4 @@ export const uploadFile = async (file: File) => {
     throw error;
   }
 };
+
