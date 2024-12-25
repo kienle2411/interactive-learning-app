@@ -2,9 +2,11 @@ import { uploadFile } from "@/api/endpoints/docfile";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "./use-toast";
 import { AxiosError } from "axios";
+import { useState } from "react";
 
 export const useUploadFile = () => {
   const { toast } = useToast();
+
   return useMutation({
     mutationFn: uploadFile,
     onSuccess: () => {
@@ -32,6 +34,6 @@ export const useUploadFile = () => {
         duration: 10000,
       });
     },
-    onSettled: () => {},
+    onSettled: () => { },
   });
 };
