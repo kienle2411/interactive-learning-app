@@ -14,44 +14,30 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import StudentClassCard from "./components/stdClassCard";
+import useStudentClasses from "@/hooks/useStudentClasses";
+import ThreeDotsWave from "@/components/ui/three-dot-wave";
+import { Classroom } from "@/types/class-response";
 
 export default function ClassesManagement() {
   const [classCode, setClassCode] = useState("");
-  const [classes] = useState<
-    { id: string; className: string; description: string }[]
-  >([
-    {
-      id: "1",
-      className: "Math Class",
-      description: "30",
-    },
-    {
-      id: "2",
-      className: "English Class",
-      description: "30",
-    },
+  const { useListStudentClasses } = useStudentClasses();
+  const { data: classes, isLoading: isLoadingStudentClasses, isError: isErrorStudentClasses } = useListStudentClasses();
 
-    {
-      id: "3",
-      className: "Math Class",
-      description: "30",
-    },
-    {
-      id: "4",
-      className: "English Class",
-      description: "30",
-    },
-    {
-      id: "5",
-      className: "Math Class",
-      description: "30",
-    },
-    {
-      id: "6",
-      className: "English Class",
-      description: "30",
-    },
-  ]);
+  // console.log("-----", classes);
+  // alert(classes);
+
+  if (isLoadingStudentClasses) {
+    return <ThreeDotsWave />;
+  }
+
+  if (isErrorStudentClasses) {
+    return <div>Error Loading classes</div>;
+  }
+
+  if (!classes || classes.length === 0) {
+    return <div>No classes available</div>;
+  }
+
 
   return (
     <div className="flex flex-col p-[24px] w-full">
@@ -90,11 +76,11 @@ export default function ClassesManagement() {
         </div>
 
         <div className="grid grid-cols-1 gap-6 mt-4">
-          {classes.map((cls) => (
+          {classes?.map((cls: Classroom) => (
             <StudentClassCard
               key={cls.id}
               id={cls.id}
-              className={cls.className}
+              className={cls.classroomName}
               description={cls.description}
             />
           ))}

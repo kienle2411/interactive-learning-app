@@ -8,8 +8,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import useStudentClasses from "@/hooks/useStudentClasses";
 import { usePathname } from "next/navigation";
 import React, { useState } from "react";
+import ThreeDotsWave from "@/components/ui/three-dot-wave";
 
 export default function Page() {
   const [students] = useState<
@@ -42,14 +44,31 @@ export default function Page() {
     },
   ]);
 
+  const { useListStudentClasses } = useStudentClasses();
+  const { data: classes, isLoading: isLoadingStudentClasses, isError: isErrorStudentClasses } = useListStudentClasses();
+
   const pathname = usePathname();
   const id = pathname.split("/")[2]; // Assuming productId is always at the 3rd position
+
+  if (isLoadingStudentClasses) {
+    return <ThreeDotsWave />;
+  }
+
+  if (isErrorStudentClasses) {
+    return <div>Error Loading classes</div>;
+  }
+
+  if (!classes || classes.length === 0) {
+    return <div>No classes available</div>;
+  }
+
+  const findClass = classes.find((cls) => cls.id === id);
 
   return (
     <div className="w-full">
       <Table>
         <TableCaption>
-          There are {students.length} students in {id} class
+          There are {students.length} students in {findClass?.classroomName} class
         </TableCaption>
         <TableHeader className="bg-slate-200 text-base">
           <TableRow>
