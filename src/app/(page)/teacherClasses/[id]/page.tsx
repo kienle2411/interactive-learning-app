@@ -115,6 +115,13 @@
 
 
 
+
+
+
+
+
+
+
 "use client";
 import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -136,6 +143,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useClassById } from '@/hooks/useTeacherClasses';
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
+import { useAddStudentToClassroom, useStudentsInClassroom } from '@/hooks/useStudentClass';
 
 export default function InvoiceTable() {
     const [open, setOpen] = useState(false);
@@ -148,12 +156,15 @@ export default function InvoiceTable() {
     const pathname = usePathname();
     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
     const [student, setStudent] = useState("");
-    const [students, setStudents] = useState<
-        { id: string; student: string; group: string; score: number }[]
-    >([]);
+    // const [students, setStudents] = useState<
+    //     { id: string; student: string; group: string; score: number }[]
+    // >([]);
+
+    const { data: students } = useStudentsInClassroom(id as string);
 
     const { classroom, isLoading, isError, error, refetch } = useClassById(id as string);
 
+    const { mutate } = useAddStudentToClassroom(id);
 
     if (isLoading) {
         // return <div>Loading class details...</div>;
@@ -174,50 +185,53 @@ export default function InvoiceTable() {
     }
 
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!student.trim()) return; // Prevent adding empty students
 
-        const newStudent = {
-            id: (students.length + 1).toString(), // Sequential ID
-            student: student,
-            group: "null",
-            score: 0,
-        };
-        setStudents([...students, newStudent]);
-        setStudent("");
-        setOpen(false);
+        // const newStudent = {
+        //     id: (students.length + 1).toString(), // Sequential ID
+        //     student: student,
+        //     group: "null",
+        //     score: 0,
+        // };
+        // setStudents([...students, newStudent]);
+        // setStudent("");
+        // setOpen(false);
+        try {
+            await mutate({ email: student });
+            setStudent("");
+            setOpen(false);
+        } catch (error) {
+            console.error("Error adding student: ", error);
+        }
     };
 
-    const openEditGroupDialog = (student: { id: string; student: string; group: string; score: number }) => {
-        setCurrentStudent(student);
-        setEditGroupOpen(true);
-    };
+    // const openEditGroupDialog = (student: { id: string; student: string; group: string; score: number }) => {
+    //     setCurrentStudent(student);
+    //     setEditGroupOpen(true);
+    // };
 
     const handleUpdateGroup = (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentStudent) return;
 
-        setStudents(students.map(std =>
-            std.id === currentStudent.id
-                ? { ...std, group: currentStudent.group }
-                : std
-        ));
+        // setStudents(students.map(std =>
+        //     std.id === currentStudent.id
+        //         ? { ...std, group: currentStudent.group }
+        //         : std
+        // ));
         setEditGroupOpen(false);
     };
 
-    // const handleDelete = (id: string) => {
-    //     setStudents(students.filter(std => std.id !== id));
+    // const confirmDelete = (id: string) => {
+    //     setStudentToDelete(id);
+    //     setDeleteConfirmOpen(true);
     // };
-
-    const confirmDelete = (id: string) => {
-        setStudentToDelete(id);
-        setDeleteConfirmOpen(true);
-    };
 
     const handleDelete = () => {
         if (studentToDelete) {
-            setStudents(students.filter(std => std.id !== studentToDelete));
+            // setStudents(students.filter(std => std.id !== studentToDelete));
             setDeleteConfirmOpen(false);
             setStudentToDelete(null);
         }
@@ -265,19 +279,6 @@ export default function InvoiceTable() {
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="group">Group</Label>
-                                {/* <Input
-                                    id="group"
-                                    // type="number"
-                                    value={currentStudent?.group || ""}
-                                    onChange={(e) =>
-                                        setCurrentStudent({
-                                            ...currentStudent!,
-                                            group: (e.target.value) || "null",
-                                        })
-                                    }
-                                    placeholder="Enter new group"
-                                    required
-                                /> */}
                                 <Select
                                     value={currentStudent?.group?.toString() || ""}
                                     onValueChange={(value) =>
@@ -324,7 +325,7 @@ export default function InvoiceTable() {
 
             <Table>
                 <TableCaption>
-                    There are {students.length} students in {classroom.classroomName} class
+                    There are {students!.length} students in {classroom.classroomName} class
                 </TableCaption>
                 <TableHeader className='bg-slate-200 text-lg'>
                     <TableRow>
@@ -336,23 +337,25 @@ export default function InvoiceTable() {
                     </TableRow>
                 </TableHeader>
                 <TableBody className='text-base'>
-                    {students.map((std) => (
+                    {students?.map((std, index: number) => (
                         <TableRow key={std.id}>
-                            <TableCell className="text-center">{std.id}</TableCell>
-                            <TableCell className="text-center">{std.student}</TableCell>
+                            <TableCell className="text-center">{index + 1}</TableCell>
+                            <TableCell className="text-center">{std.name}</TableCell>
                             <TableCell className="text-center">{std.group}</TableCell>
                             <TableCell className="text-center">{std.score}</TableCell>
                             <TableCell className="text-center">
                                 <Button className='m-2'
                                     variant="secondary"
                                     size="sm"
-                                    onClick={() => openEditGroupDialog(std)}>
+                                // onClick={() => openEditGroupDialog(std)}
+                                >
                                     Update
                                 </Button>
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                    onClick={() => confirmDelete(std.id)}>
+                                // onClick={() => confirmDelete(std.id)}
+                                >
                                     Delete
                                 </Button>
                             </TableCell>
@@ -363,3 +366,7 @@ export default function InvoiceTable() {
         </>
     )
 }
+
+
+
+
