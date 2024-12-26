@@ -389,8 +389,26 @@ export default function MaterialTable() {
               <TableCell className="text-center">{index + 1}</TableCell>
               <TableCell className="text-center">{mat.title}</TableCell>
               <TableCell className="text-center">{mat.description}</TableCell>
-              <TableCell className="text-center"><a href={mat.url} className="underline text-blue-700">{mat.url}</a></TableCell>
-              <TableCell className="text-center"><a className="underline text-blue-700" href={`https://learn.kienle2411.id.vn/api/docfiles/${mat.id}/download`}>{mat.title}</a></TableCell>
+              {/* <TableCell className="text-center"><a href={mat.url} className="underline text-blue-700">{mat.url}</a></TableCell> */}
+              <TableCell className="text-center">
+                {mat.url && mat.url.trim() !== "" ? (
+                  <a href={mat.url} className="underline text-blue-700">{mat.url}</a>
+                ) : (
+                  <p>-</p>
+                )}
+              </TableCell>
+              <TableCell className="text-center">
+                {mat.docFileId && mat.docFileId.trim() !== "" ? (
+                  <a
+                    className="underline text-blue-700"
+                    href={`https://learn.kienle2411.id.vn/api/docfiles/${mat.docFileId}/download`}
+                  >
+                    {mat.title}
+                  </a>
+                ) : (
+                  <p>-</p>
+                )}
+              </TableCell>
               <TableCell className="text-center">
                 <Button className="m-2" variant="secondary" onClick={() => openEditDialog(mat)}>Edit</Button>
               </TableCell>

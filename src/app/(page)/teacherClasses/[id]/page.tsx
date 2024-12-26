@@ -325,7 +325,7 @@ export default function InvoiceTable() {
 
             <Table>
                 <TableCaption>
-                    There are {students!.length} students in {classroom.classroomName} class
+                    {/* There are {students!.length} students in {classroom.classroomName} class */}
                 </TableCaption>
                 <TableHeader className='bg-slate-200 text-lg'>
                     <TableRow>
