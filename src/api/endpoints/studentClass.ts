@@ -24,7 +24,7 @@ export const getStudentsInClassroom = async (classroomId: string): Promise<Stude
             id: item.student.user.id,
             name: item.student.user.username,
             group: "Not Assigned",
-            score: "0",
+            score: item.totalScore,
         }));
     } catch (error) {
         console.error('Error fetching students in classroom:', error);

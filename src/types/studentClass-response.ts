@@ -14,6 +14,7 @@ export interface Student {
     student: {
         user: User;
     };
+    groups: string;
     totalScore: string;
 }
 
@@ -23,3 +24,5 @@ export interface StudentForDisplay {
     group: string;
     score: string;
 }
+
+
