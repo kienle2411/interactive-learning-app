@@ -15,19 +15,31 @@
 
 // export default useStudentClasses;
 
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import studentClassesAction from "@/api/endpoints/studentClasses";
 import { Classroom } from "@/types/class-response";
 
 const useStudentClasses = () => {
+    const queryClient = useQueryClient();
+
     const useListStudentClasses = () =>
         useQuery<Classroom[], Error>({
             queryKey: ["student-classes"],
             queryFn: studentClassesAction.list,
         });
 
+
+    const useStudentJoinClass = useMutation({
+        mutationFn: (id: string) => studentClassesAction.joinclass(id),
+        onSuccess: () => {
+            // Invalidate và refetch
+            queryClient.invalidateQueries({ queryKey: ["student-classes"] });
+        },
+    });
+
     return {
         useListStudentClasses,
+        useStudentJoinClass,
     };
 };
 

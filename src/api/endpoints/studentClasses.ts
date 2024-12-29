@@ -30,6 +30,16 @@ const studentClassesAction = {
             console.error("Student fetch classes error: ", error);
             throw new Error("Failed to fetch data");
         }
+    },
+
+    joinclass: async (id: string) => {
+        try {
+            const response = await axiosClient.post(`/join-class/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Joining class failed: ", error);
+            throw new Error("Failed to join class");
+        }
     }
 };
 
