@@ -44,6 +44,8 @@ const Page = () => {
   ]);
 
   const [currentDate, setCurrentDate] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [newQuestion, setNewQuestion] = useState({
     question: "",
     answers: [
@@ -136,6 +138,28 @@ const Page = () => {
                   placeholder="Date"
                   readOnly
                   defaultValue={currentDate}
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="date" className="font-semibold">
+                  Title
+                </Label>
+                <Input
+                  id="title"
+                  placeholder="Enter title"
+                  defaultValue={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="date" className="font-semibold">
+                  Description
+                </Label>
+                <Input
+                  id="description"
+                  placeholder="Enter description"
+                  defaultValue={description}
+                  onChange={(e) => setDescription(e.target.value)}
                 />
               </div>
             </div>

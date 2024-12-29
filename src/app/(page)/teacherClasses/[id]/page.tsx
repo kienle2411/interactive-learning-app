@@ -156,9 +156,6 @@ export default function InvoiceTable() {
     const pathname = usePathname();
     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
     const [student, setStudent] = useState("");
-    // const [students, setStudents] = useState<
-    //     { id: string; student: string; group: string; score: number }[]
-    // >([]);
 
     const { data: students } = useStudentsInClassroom(id as string);
 
@@ -167,7 +164,6 @@ export default function InvoiceTable() {
     const { mutate } = useAddStudentToClassroom(id);
 
     if (isLoading) {
-        // return <div>Loading class details...</div>;
         return <ThreeDotsWave />;
     }
 
@@ -181,23 +177,14 @@ export default function InvoiceTable() {
     }
 
     if (!classroom) {
-        return <div>No class details found.</div>;
+        <div>No class details found.</div>;
     }
 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!student.trim()) return; // Prevent adding empty students
+        if (!student.trim()) return; // Prevent adding empty studentsW
 
-        // const newStudent = {
-        //     id: (students.length + 1).toString(), // Sequential ID
-        //     student: student,
-        //     group: "null",
-        //     score: 0,
-        // };
-        // setStudents([...students, newStudent]);
-        // setStudent("");
-        // setOpen(false);
         try {
             await mutate({ email: student });
             setStudent("");
@@ -207,31 +194,14 @@ export default function InvoiceTable() {
         }
     };
 
-    // const openEditGroupDialog = (student: { id: string; student: string; group: string; score: number }) => {
-    //     setCurrentStudent(student);
-    //     setEditGroupOpen(true);
-    // };
-
     const handleUpdateGroup = (e: React.FormEvent) => {
         e.preventDefault();
         if (!currentStudent) return;
-
-        // setStudents(students.map(std =>
-        //     std.id === currentStudent.id
-        //         ? { ...std, group: currentStudent.group }
-        //         : std
-        // ));
         setEditGroupOpen(false);
     };
 
-    // const confirmDelete = (id: string) => {
-    //     setStudentToDelete(id);
-    //     setDeleteConfirmOpen(true);
-    // };
-
     const handleDelete = () => {
         if (studentToDelete) {
-            // setStudents(students.filter(std => std.id !== studentToDelete));
             setDeleteConfirmOpen(false);
             setStudentToDelete(null);
         }
