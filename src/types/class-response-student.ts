@@ -26,3 +26,12 @@ export interface ApiResponse {
     statusCode: number;
     data: ClassResponse;
 }
+
+export interface ApiJoinClass {
+    status: string;
+    statusCode: number;
+    data: {
+        message: string;
+    }
+}
+
