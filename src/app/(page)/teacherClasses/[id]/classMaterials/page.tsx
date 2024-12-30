@@ -26,7 +26,7 @@ import ThreeDotsWave from "@/components/ui/three-dot-wave";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useUploadFile } from "@/hooks/useDocfiles";
 import { File, X } from "lucide-react";
-import { useCreateMaterial, useTeacherMaterial, useUpdateMaterial } from "@/hooks/useMaterials";
+import { useCreateMaterial, useTeacherMaterial_tanstack, useUpdateMaterial } from "@/hooks/useMaterials";
 import { Material } from "@/types/material-response";
 
 export default function MaterialTable() {
@@ -46,7 +46,8 @@ export default function MaterialTable() {
   const { mutate: uploadFile, status } = useUploadFile();
 
   const { classroom, isLoading, isError, refetch } = useClassById(id as string);
-  const { materials, loading, error, refetchMaterials } = useTeacherMaterial(id as string);
+  // const { materials, loading, error, refetchMaterials } = useTeacherMaterial(id as string);
+  const { materials, loading, error, refetchMaterials } = useTeacherMaterial_tanstack(id as string);
 
   const { mutate } = useUpdateMaterial(id);
 
@@ -102,12 +103,10 @@ export default function MaterialTable() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
-
     if (link && !isValidUrl(link)) {
       alert("Invalid URL. Please enter a valid URL.");
       return;
     }
-
     try {
       await createMaterial({
         title,
@@ -115,8 +114,6 @@ export default function MaterialTable() {
         url: link || undefined,
         file: selectedFile || undefined,
       });
-
-      // Reset form
       setTitle("");
       setDescription("");
       setLink("");
@@ -127,7 +124,7 @@ export default function MaterialTable() {
   };
 
 
-  const handleUpdateMaterial = (e: React.FormEvent) => {
+  const handleUpdateMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentMaterial) return;
 
@@ -138,17 +135,30 @@ export default function MaterialTable() {
       return;
     }
 
-    mutate(
-      { id: currentMaterial.id, newMaterial: currentMaterial },
-      {
-        onSuccess: () => {
-          setEditMaterialOpen(false);
+    try {
+      await mutate(
+        {
+          id: currentMaterial.id,
+          newMaterial: {
+            title: currentMaterial.title,
+            description: currentMaterial.description,
+            url: currentMaterial.url || undefined
+          }
         },
-        onError: (error) => {
-          console.error("Failed to update material:", error);
-        },
-      }
-    );
+        {
+          onSuccess: () => {
+            setEditMaterialOpen(false);
+            setCurrentMaterial(null);
+            setSelectedFile(null);
+          },
+          onError: (error) => {
+            console.error("Failed to update material:", error);
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating material:", error);
+    }
   };
 
 
@@ -325,41 +335,6 @@ export default function MaterialTable() {
                   placeholder="Enter material's link"
                 />
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="materialFile">Material File</Label>
-                <div
-                  className="flex flex-col p-[20px] border-dashed border-2 border-gray-300 rounded-lg items-center space-y-2 cursor-pointer"
-                  onClick={handleClick}
-                >
-                  {currentMaterial?.docFileId ? (
-                    <div className="flex space-x-5">
-                      <div className="text-muted-foreground">{currentMaterial?.docFileId}</div>
-                      <X strokeWidth={1.5} color="#737373" onClick={handleClear} />
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <File color="#737373" />
-                      <div className="text-muted-foreground">
-                        Upload a file or drag and drop
-                      </div>
-                    </div>
-                  )}
-                  <Input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={(e) =>
-                      setCurrentMaterial({
-                        ...currentMaterial!,
-                        docFileId: e.target.value,
-                      })
-                    }
-                    className="hidden"
-                  />
-                  <LoadingButton loading={status === "pending"} onClick={handleUpload}>
-                    Upload
-                  </LoadingButton>
-                </div>
-              </div>
             </div>
             <DialogFooter>
               <Button type="submit">Update</Button>
@@ -419,8 +394,5 @@ export default function MaterialTable() {
     </>
   )
 }
-
-
-
 
 

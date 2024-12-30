@@ -16,6 +16,12 @@ export interface MaterialInput {
     file?: File;
 }
 
+export interface MaterialUpdate {
+    title: string;
+    description: string;
+    url?: string;
+}
+
 export interface MaterialData {
     data: Material[];
     total: number;

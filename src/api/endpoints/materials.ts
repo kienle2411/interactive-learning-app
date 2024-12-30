@@ -1,10 +1,11 @@
-import { Material, MaterialData, MaterialInput } from "@/types/material-response";
+import { Material, MaterialData, MaterialInput, MaterialUpdate } from "@/types/material-response";
 import { ApiResponse } from "@/types/response-types";
 import axiosClient from "../axios-client";
 
 export const fetchClassMaterials = async (id: string): Promise<ApiResponse<MaterialData>> => {
     try {
         const response = await axiosClient.get(`/classrooms/${id}/materials`);
+        console.log("maaterials: ", response.data);
         return response.data;
     } catch (error) {
         console.error("Error fetching materials: ", error);
@@ -12,21 +13,9 @@ export const fetchClassMaterials = async (id: string): Promise<ApiResponse<Mater
     }
 }
 
-export const updateMaterial = async (id: string, newMaterial: MaterialInput): Promise<MaterialInput> => {
+export const updateMaterial = async (id: string, data: MaterialUpdate) => {
     try {
-        const formData = new FormData();
-
-        formData.append("title", newMaterial.title);
-        formData.append("description", newMaterial.description);
-        if (newMaterial.url) {
-            formData.append("url", newMaterial.url);
-        }
-        if (newMaterial.file) {
-            formData.append("file", newMaterial.file);
-        }
-        const response = await axiosClient.patch(`/materials/${id}`, formData, {
-            headers: { "Content-Type": "multipart/form-data" },
-        });
+        const response = await axiosClient.patch(`/materials/${id}`, data);
         return response.data;
     } catch (error) {
         console.error("Error fetching materials: ", error);

@@ -1,5 +1,5 @@
 import { createMaterial, downloadDocFile, fetchClassMaterials, updateMaterial } from "@/api/endpoints/materials";
-import { Material, MaterialInput } from "@/types/material-response";
+import { Material, MaterialInput, MaterialUpdate } from "@/types/material-response";
 import { useEffect, useState } from "react";
 import { useToast } from "./use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -80,7 +80,7 @@ export const useTeacherMaterial_tanstack = (id: string) => {
             if (!response || !response.data) {
                 throw new Error("No data available.");
             }
-            return response.data.data; // Trả về danh sách lớp học
+            return response.data.data;
         },
     });
 
@@ -98,15 +98,16 @@ export const useUpdateMaterial = (classroomId: string) => {
     const { toast } = useToast();
 
     const mutation = useMutation({
-        mutationFn: (variables: { id: string; newMaterial: MaterialInput }) =>
+        mutationFn: (variables: { id: string; newMaterial: MaterialUpdate }) =>
             updateMaterial(variables.id, variables.newMaterial),
-        onSuccess: () => {
+        onSuccess: (data) => {
             toast({
                 title: "Success",
                 description: "Material updated successfully",
             });
             // Refetch the updated materials list for the classroom
             queryClient.invalidateQueries({ queryKey: ["classMaterials", classroomId] });
+
         },
         onError: () => {
             toast({
