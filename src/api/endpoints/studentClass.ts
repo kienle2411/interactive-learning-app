@@ -1,4 +1,4 @@
-import { Student, StudentForDisplay } from "@/types/studentClass-response";
+import { ApiResponse } from "@/types/studentClass-response";
 import axiosClient from "../axios-client";
 
 //role =  teacher
@@ -16,18 +16,17 @@ export const addStudentsToClassroom = async (classroomId: string, email: string)
 };
 
 
-export const getStudentsInClassroom = async (classroomId: string): Promise<StudentForDisplay[]> => {
-    try {
-        const response = await axiosClient.get(`/classrooms/${classroomId}/students`);
-        // return response.data; // Dữ liệu học sinh trong lớp học
-        return response.data.data.data.map((item: Student) => ({
-            id: item.student.user.id,
-            name: item.student.user.username,
-            group: "Not Assigned",
-            score: item.totalScore,
-        }));
-    } catch (error) {
-        console.error('Error fetching students in classroom:', error);
-        throw error; // Throw error để xử lý ở nơi gọi API
+const teacherClassAction = {
+    list: async (classroomId: string) => {
+        try {
+            const response = await axiosClient.get<ApiResponse>(`/classrooms/${classroomId}/students`);
+            console.log(response.data.data.data);
+            return response.data.data.data;
+        } catch (error) {
+            console.error("Group fetch student error: ", error);
+            throw new Error("Failed to fetch data");
+        }
     }
-};
+}
+
+export default teacherClassAction;
