@@ -123,7 +123,7 @@
 
 
 "use client";
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
 import {
@@ -143,7 +143,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useClassById } from '@/hooks/useTeacherClasses';
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
-import { useAddStudentToClassroom, useStudentsInClassroom } from '@/hooks/useStudentClass';
+import { useAddStudentToClassroom, useDeleteStudentFromClassroom, useStudentsInClass } from '@/hooks/useStudentClass';
+import { useTeacherGroup } from '@/hooks/useTeacherGroup';
 
 export default function InvoiceTable() {
     const [open, setOpen] = useState(false);
@@ -153,11 +154,28 @@ export default function InvoiceTable() {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
 
+
     const pathname = usePathname();
-    const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
+    const id = pathname.split('/')[2];
     const [student, setStudent] = useState("");
 
-    const { data: students } = useStudentsInClassroom(id as string);
+    const { data: students, isLoading: studentIsLoading } = useStudentsInClass(id);
+    const { groups } = useTeacherGroup(id);
+    const { mutate: deleteStudent } = useDeleteStudentFromClassroom(id);
+
+    const enrichedStudents = useMemo(() => {
+        if (!students || !groups) return [];
+
+        return students.map((student) => {
+            const groupId = student.student.groups[0]?.groupId;
+            const groupName = groups.find((group) => group.id === groupId)?.groupName || "-";
+
+            return {
+                ...student,
+                groupName,
+            };
+        });
+    }, [students, groups]);
 
     const { classroom, isLoading, isError, error, refetch } = useClassById(id as string);
 
@@ -177,6 +195,14 @@ export default function InvoiceTable() {
     }
 
     if (!classroom) {
+        <div>No class details found.</div>;
+    }
+
+    if (studentIsLoading) {
+        return <ThreeDotsWave />;
+    }
+
+    if (!students) {
         <div>No class details found.</div>;
     }
 
@@ -202,10 +228,20 @@ export default function InvoiceTable() {
 
     const handleDelete = () => {
         if (studentToDelete) {
+            deleteStudent({ studentId: studentToDelete });
+
+            console.log("Heh I deleted ", studentToDelete);
             setDeleteConfirmOpen(false);
             setStudentToDelete(null);
         }
     };
+
+    const confirmDelete = (studentId: string) => {
+        setStudentToDelete(studentId);
+        setDeleteConfirmOpen(true);
+    };
+
+
 
     return (
         <>
@@ -262,10 +298,11 @@ export default function InvoiceTable() {
                                         <SelectValue placeholder="Select a group" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="Group 1">Group 1</SelectItem>
-                                        <SelectItem value="Group 2">Group 2</SelectItem>
-                                        <SelectItem value="Group 3">Group 3</SelectItem>
-                                        <SelectItem value="Group 4">Group 4</SelectItem>
+                                        {groups?.map((grp) => (
+                                            <SelectItem key={grp.id} value={grp.id}>
+                                                {grp.groupName}
+                                            </SelectItem>
+                                        ))}
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -307,12 +344,12 @@ export default function InvoiceTable() {
                     </TableRow>
                 </TableHeader>
                 <TableBody className='text-base'>
-                    {students?.map((std, index: number) => (
-                        <TableRow key={std.id}>
+                    {enrichedStudents?.map((std, index: number) => (
+                        <TableRow key={std.student.user.id}>
                             <TableCell className="text-center">{index + 1}</TableCell>
-                            <TableCell className="text-center">{std.name}</TableCell>
-                            <TableCell className="text-center">{std.group}</TableCell>
-                            <TableCell className="text-center">{std.score}</TableCell>
+                            <TableCell className="text-center">{std.student.user.username}</TableCell>
+                            <TableCell className="text-center">{std.groupName}</TableCell>
+                            <TableCell className="text-center">{std.totalScore}</TableCell>
                             <TableCell className="text-center">
                                 <Button className='m-2'
                                     variant="secondary"
@@ -324,7 +361,7 @@ export default function InvoiceTable() {
                                 <Button
                                     variant="destructive"
                                     size="sm"
-                                // onClick={() => confirmDelete(std.id)}
+                                    onClick={() => confirmDelete(std.student.id)}
                                 >
                                     Delete
                                 </Button>
@@ -336,7 +373,5 @@ export default function InvoiceTable() {
         </>
     )
 }
-
-
 
 

@@ -1,4 +1,5 @@
-import { addStudentsToClassroom, getStudentsInClassroom } from "@/api/endpoints/studentClass";
+import teacherClassAction, { addStudentsToClassroom } from "@/api/endpoints/studentClass";
+import { StudentData } from "@/types/studentClass-response";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 //role = teacher
@@ -18,11 +19,28 @@ export const useAddStudentToClassroom = (classroomId: string) => {
 };
 
 
-export const useStudentsInClassroom = (classroomId: string) => {
+export const useStudentsInClass = (classroomId: string) => {
     return useQuery({
-        queryKey: ["students", classroomId],
-        queryFn: () => getStudentsInClassroom(classroomId),
-        enabled: !!classroomId,
-        staleTime: 5 * 60 * 1000,
+        queryKey: ["students", classroomId], // Key duy nhất cho query
+        queryFn: () => teacherClassAction.list(classroomId), // Hàm lấy dữ liệu
+        enabled: !!classroomId, // Chỉ chạy khi classroomId có giá trị
+        staleTime: 5 * 60 * 1000, // Cache dữ liệu trong 5 phút
+        refetchOnWindowFocus: false, // Không tự động refetch khi chuyển đổi tab
     });
 };
+
+
+export const useDeleteStudentFromClassroom = (classroomId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ studentId }: { studentId: string }) => teacherClassAction.delete(classroomId, studentId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["students", classroomId] });
+            console.log('Student deleted successfully');
+        },
+        onError: (error) => {
+            console.error('Error deleting student from classroom:', error);
+        },
+    });
+}
