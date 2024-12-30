@@ -26,6 +26,17 @@ const teacherClassAction = {
             console.error("Group fetch student error: ", error);
             throw new Error("Failed to fetch data");
         }
+    },
+    delete: async (classroomId: string, studentId: string) => {
+        try {
+            const response = await axiosClient.delete(`/join-class`, {
+                data: { classroomId, studentId }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Group fetch student error: ", error);
+            throw new Error("Failed to fetch data");
+        }
     }
 }
 

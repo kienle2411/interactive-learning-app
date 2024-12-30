@@ -143,7 +143,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useClassById } from '@/hooks/useTeacherClasses';
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
-import { useAddStudentToClassroom, useStudentsInClass } from '@/hooks/useStudentClass';
+import { useAddStudentToClassroom, useDeleteStudentFromClassroom, useStudentsInClass } from '@/hooks/useStudentClass';
 import { useTeacherGroup } from '@/hooks/useTeacherGroup';
 
 export default function InvoiceTable() {
@@ -154,12 +154,14 @@ export default function InvoiceTable() {
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
 
+
     const pathname = usePathname();
     const id = pathname.split('/')[2];
     const [student, setStudent] = useState("");
 
     const { data: students, isLoading: studentIsLoading } = useStudentsInClass(id);
     const { groups } = useTeacherGroup(id);
+    const { mutate: deleteStudent } = useDeleteStudentFromClassroom(id);
 
     const enrichedStudents = useMemo(() => {
         if (!students || !groups) return [];
@@ -226,7 +228,8 @@ export default function InvoiceTable() {
 
     const handleDelete = () => {
         if (studentToDelete) {
-            //////do something
+            deleteStudent({ studentId: studentToDelete });
+
             console.log("Heh I deleted ", studentToDelete);
             setDeleteConfirmOpen(false);
             setStudentToDelete(null);

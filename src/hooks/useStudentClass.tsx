@@ -28,3 +28,19 @@ export const useStudentsInClass = (classroomId: string) => {
         refetchOnWindowFocus: false, // Không tự động refetch khi chuyển đổi tab
     });
 };
+
+
+export const useDeleteStudentFromClassroom = (classroomId: string) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ studentId }: { studentId: string }) => teacherClassAction.delete(classroomId, studentId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["students", classroomId] });
+            console.log('Student deleted successfully');
+        },
+        onError: (error) => {
+            console.error('Error deleting student from classroom:', error);
+        },
+    });
+}
