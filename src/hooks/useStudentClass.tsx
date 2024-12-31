@@ -1,5 +1,4 @@
 import teacherClassAction, { addStudentsToClassroom } from "@/api/endpoints/studentClass";
-import { StudentData } from "@/types/studentClass-response";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 //role = teacher
@@ -25,7 +24,7 @@ export const useStudentsInClass = (classroomId: string) => {
         queryFn: () => teacherClassAction.list(classroomId), // Hàm lấy dữ liệu
         enabled: !!classroomId, // Chỉ chạy khi classroomId có giá trị
         staleTime: 5 * 60 * 1000, // Cache dữ liệu trong 5 phút
-        refetchOnWindowFocus: false, // Không tự động refetch khi chuyển đổi tab
+        refetchOnWindowFocus: true, // Tự động refetch khi chuyển đổi tab
     });
 };
 
@@ -44,3 +43,18 @@ export const useDeleteStudentFromClassroom = (classroomId: string) => {
         },
     });
 }
+
+
+export const useUpdateInGroup = (classroomId: string) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ groupId, studentId }: { groupId: string, studentId: string }) => teacherClassAction.updateInGroup(groupId, studentId),
+        onSuccess: (data) => {
+            console.log('Add student to group successfully:', data);
+            queryClient.invalidateQueries({ queryKey: ["students", classroomId] });
+        },
+        onError: (error) => {
+            console.error('Error adding student to group:', error);
+        },
+    });
+};
