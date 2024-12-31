@@ -1,127 +1,3 @@
-// "use client";
-// import React, { useState } from 'react';
-// import { usePathname } from 'next/navigation';
-
-// import {
-//     Table,
-//     TableBody,
-//     TableCaption,
-//     TableCell,
-//     TableHead,
-//     TableHeader,
-//     TableRow,
-// } from "@/components/ui/table"
-// import { Button } from '@/components/ui/button';
-// import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-// import { Label } from '@radix-ui/react-label';
-// import { Input } from '@/components/ui/input';
-
-
-
-// export default function InvoiceTable() {
-//     const [open, setOpen] = useState(false);
-
-//     const pathname = usePathname();
-//     const id = pathname.split('/')[2]; // Assuming productId is always at the 3rd position
-//     const [student, setStudent] = useState("");
-//     const [students, setStudents] = useState<
-//         { id: string; student: string; group: string; score: string }[]
-//     >([
-//         {
-//             id: "1",
-//             student: "Math Class",
-//             group: 30,
-//             score: "MATH101",
-//         },
-//         {
-//             id: "2",
-//             student: "English Class",
-//             group: 45,
-//             score: "ENG1234",
-//         },
-//     ]);
-
-//     const handleSubmit = (e: React.FormEvent) => {
-//         e.preventDefault();
-//         const newStudent = {
-//             id: Math.random().toString(36).substr(2, 5), // Generate unique ID
-//             student: student,
-//             group: 0,
-//             score: `CLASS${Math.random().toString(36).substr(2, 5).toUpperCase()}`,
-//         };
-//         setStudents([...students, newStudent]);
-//         setStudent("");
-//         setOpen(false);
-//     };
-
-//     return (
-//         <>
-//             <div className="col-span-2 flex justify-end pb-4 w-full">
-//                 <Dialog open={open} onOpenChange={setOpen}>
-//                     <DialogTrigger asChild>
-//                         <Button variant="default">Add new Student</Button>
-//                     </DialogTrigger>
-//                     <DialogContent className="sm:max-w-[425px]">
-//                         <DialogHeader>
-//                             <DialogTitle>Add new Student</DialogTitle>
-//                         </DialogHeader>
-//                         <form onSubmit={handleSubmit}>
-//                             <div className="grid gap-4 py-4">
-//                                 <div className="grid gap-2">
-//                                     <Label htmlFor="studentEmail">Email</Label>
-//                                     <Input
-//                                         id="studentEmail"
-//                                         value={student}
-//                                         onChange={(e) => setStudent(e.target.value)}
-//                                         placeholder="Enter student's email"
-//                                     />
-//                                 </div>
-//                             </div>
-//                             <DialogFooter>
-//                                 <Button type="submit">Create</Button>
-//                             </DialogFooter>
-//                         </form>
-//                     </DialogContent>
-//                 </Dialog>
-//             </div>
-
-//             <Table>
-//                 <TableCaption>There are {7} students in {id} class</TableCaption>
-//                 <TableHeader>
-//                     <TableRow>
-//                         <TableHead>No.</TableHead>
-//                         <TableHead>Name</TableHead>
-//                         <TableHead>Group</TableHead>
-//                         <TableHead>Score</TableHead>
-//                         <TableHead>Action</TableHead>
-//                     </TableRow>
-//                 </TableHeader>
-//                 <TableBody>
-//                     {students.map((std) => (
-//                         <TableRow key={std.id}>
-//                             <TableCell className="font-medium">{std.id}</TableCell>
-//                             <TableCell>{std.student}</TableCell>
-//                             <TableCell>{std.group}</TableCell>
-//                             <TableCell >{std.score}</TableCell>
-//                             <TableCell></TableCell>
-//                         </TableRow>
-//                     ))}
-//                 </TableBody>
-//             </Table>
-//         </>
-
-//     )
-// }
-
-
-
-
-
-
-
-
-
-
 "use client";
 import React, { useMemo, useState } from 'react';
 import { usePathname } from 'next/navigation';
@@ -143,13 +19,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useClassById } from '@/hooks/useTeacherClasses';
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
-import { useAddStudentToClassroom, useDeleteStudentFromClassroom, useStudentsInClass } from '@/hooks/useStudentClass';
+import { useAddStudentToClassroom, useDeleteStudentFromClassroom, useStudentsInClass, useUpdateInGroup } from '@/hooks/useStudentClass';
 import { useTeacherGroup } from '@/hooks/useTeacherGroup';
+import { Student } from '@/types/studentClass-response';
 
-export default function InvoiceTable() {
+export default function TeacherBoard() {
     const [open, setOpen] = useState(false);
     const [editGroupOpen, setEditGroupOpen] = useState(false);
-    const [currentStudent, setCurrentStudent] = useState<{ id: string; student: string; group: string; score: number } | null>(null);
+    const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
 
     const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
     const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
@@ -162,20 +39,29 @@ export default function InvoiceTable() {
     const { data: students, isLoading: studentIsLoading } = useStudentsInClass(id);
     const { groups } = useTeacherGroup(id);
     const { mutate: deleteStudent } = useDeleteStudentFromClassroom(id);
+    const { mutate: updateGroup } = useUpdateInGroup(id);
+
 
     const enrichedStudents = useMemo(() => {
         if (!students || !groups) return [];
 
         return students.map((student) => {
-            const groupId = student.student.groups[0]?.groupId;
-            const groupName = groups.find((group) => group.id === groupId)?.groupName || "-";
+            const groupNames = student.student.groups.map((grp) => {
+                const grpId = grp.groupId;
+                return groups.find((group) => group.id === grpId && grp.classroomId === id)?.groupName || "";
+            });
+
+            let groupName = groupNames.join("");
+            if (groupName === "")
+                groupName = "-";
 
             return {
                 ...student,
                 groupName,
             };
         });
-    }, [students, groups]);
+    }, [students, groups, id]);
+
 
     const { classroom, isLoading, isError, error, refetch } = useClassById(id as string);
 
@@ -220,10 +106,28 @@ export default function InvoiceTable() {
         }
     };
 
-    const handleUpdateGroup = (e: React.FormEvent) => {
+    const handleUpdateGroup = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!currentStudent) return;
-        setEditGroupOpen(false);
+        if (!currentStudent?.groups?.[0]) return;
+
+        const updatedGroupId = currentStudent.groups[0].groupId;
+        console.log("updateGroupId: ", updatedGroupId);
+        console.log("studentId: ", currentStudent.id);
+        try {
+            await updateGroup({
+                studentId: currentStudent.id, // ID của học sinh cần cập nhật
+                groupId: updatedGroupId,            // groupId mới
+            });
+            setEditGroupOpen(false); // Đóng dialog
+            setCurrentStudent(null); // Reset current student
+        } catch (error) {
+            console.error("Error updating group:", error); // Xử lý lỗi
+        }
+    };
+
+    const openEditGroupDialog = (student: Student) => {
+        setCurrentStudent(student);
+        setEditGroupOpen(true);  // Mở popup cập nhật
     };
 
     const handleDelete = () => {
@@ -285,14 +189,20 @@ export default function InvoiceTable() {
                         <div className="grid gap-4 py-4">
                             <div className="grid gap-2">
                                 <Label htmlFor="group">Group</Label>
+                                <Label htmlFor="group-title" className="text-red-600 text-sm italic font-semibold">Please acknowledge that you can only choose the group once</Label>
                                 <Select
-                                    value={currentStudent?.group?.toString() || ""}
-                                    onValueChange={(value) =>
-                                        setCurrentStudent({
-                                            ...currentStudent!,
-                                            group: (value),
-                                        })
-                                    }
+                                    value={currentStudent?.groups[0]?.groupId.toString() || ""}
+                                    onValueChange={(value) => {
+                                        if (currentStudent && currentStudent.groups?.[0]) {
+                                            setCurrentStudent({
+                                                ...currentStudent,
+                                                groups: [{
+                                                    ...currentStudent.groups[0],
+                                                    groupId: value
+                                                }]
+                                            });
+                                        }
+                                    }}
                                 >
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select a group" />
@@ -312,10 +222,10 @@ export default function InvoiceTable() {
                         </DialogFooter>
                     </form>
                 </DialogContent>
-            </Dialog>
+            </Dialog >
 
             {/* Delete Confirmation Alert Dialog */}
-            <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+            < AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen} >
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -328,7 +238,7 @@ export default function InvoiceTable() {
                         <AlertDialogAction onClick={handleDelete}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </ AlertDialog>
 
             <Table>
                 <TableCaption>
@@ -354,7 +264,8 @@ export default function InvoiceTable() {
                                 <Button className='m-2'
                                     variant="secondary"
                                     size="sm"
-                                // onClick={() => openEditGroupDialog(std)}
+                                    onClick={() => openEditGroupDialog(std.student)}
+                                    disabled={std.groupName !== "-" ? true : false}
                                 >
                                     Update
                                 </Button>

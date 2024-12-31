@@ -60,15 +60,21 @@ export default function Page() {
     if (!students || !groups) return [];
 
     return students.map((student) => {
-      const groupId = student.student.groups[0]?.groupId;
-      const groupName = groups.find((group) => group.id === groupId)?.groupName || "-";
+      const groupNames = student.student.groups.map((grp) => {
+        const grpId = grp.groupId;
+        return groups.find((group) => group.id === grpId && grp.classroomId === id)?.groupName || "";
+      });
+
+      let groupName = groupNames.join("");
+      if (groupName === "")
+        groupName = "-";
 
       return {
         ...student,
         groupName,
       };
     });
-  }, [students, groups]);
+  }, [students, groups, id]);
 
 
   if (isLoadingStudentClasses) {
