@@ -35,64 +35,79 @@ import { ClassroomData, Classroom } from "@/types/class-response";
 import axios from "axios";
 
 // Fetch danh sách lớp học của giáo viên
-export const fetchTeacherClasses = async (): Promise<ApiResponse<ClassroomData>> => {
-    try {
-        const response = await axiosClient.get("/teachers/classrooms");
-        return response.data; // Trả về dữ liệu sau khi nhận được response từ server
-    } catch (error) {
-        console.error("Error fetching classrooms:", error);
-        throw error; // Ném lỗi lên để các hàm gọi phía trên có thể xử lý
-    }
+export const fetchTeacherClasses = async (): Promise<
+  ApiResponse<ClassroomData>
+> => {
+  try {
+    const response = await axiosClient.get("/teachers/classrooms");
+    return response.data; // Trả về dữ liệu sau khi nhận được response từ server
+  } catch (error) {
+    console.error("Error fetching classrooms:", error);
+    throw error; // Ném lỗi lên để các hàm gọi phía trên có thể xử lý
+  }
 };
 
-export const createClass = async (newClass: Omit<Classroom, "id" | "createdAt" | "updatedAt" | "deletedAt" | "teacherId">): Promise<Classroom> => {
-    try {
-        const response = await axiosClient.post("/classrooms", newClass);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error("API Error: ", error.response?.data);  // Log phản hồi lỗi từ server
-        }
-        console.error("Error creating class: ", error);
-        throw error;
+export const createClass = async (
+  newClass: Omit<
+    Classroom,
+    "id" | "createdAt" | "updatedAt" | "deletedAt" | "teacherId"
+  >
+): Promise<Classroom> => {
+  try {
+    const response = await axiosClient.post("/classrooms", newClass);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("API Error: ", error.response?.data); // Log phản hồi lỗi từ server
     }
-}
+    console.error("Error creating class: ", error);
+    throw error;
+  }
+};
 
-export const updateClass = async (id: string, updatedClass: Partial<Omit<Classroom, "id" | "createdAt" | "updatedAt" | "deletedAt" | "teacherId">>): Promise<Classroom> => {
-    try {
-        const response = await axiosClient.patch(`/classrooms/${id}`, updatedClass);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error("API Error: ", error.response?.data);
-        }
-        console.error("Error updating class: ", error);
-        throw error;
+export const updateClass = async (
+  id: string,
+  updatedClass: Partial<
+    Omit<
+      Classroom,
+      "id" | "createdAt" | "updatedAt" | "deletedAt" | "teacherId"
+    >
+  >
+): Promise<Classroom> => {
+  try {
+    const response = await axiosClient.patch(`/classrooms/${id}`, updatedClass);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("API Error: ", error.response?.data);
     }
-}
+    console.error("Error updating class: ", error);
+    throw error;
+  }
+};
 
 export const deleteClassroom = async (id: string) => {
-    try {
-        const response = await axiosClient.delete(`/classrooms/${id}`);
-        return response.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error("API Error: ", error.response?.data);
-        }
-        console.error("Error updating class: ", error);
-        throw error;
+  try {
+    const response = await axiosClient.delete(`/classrooms/${id}`);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("API Error: ", error.response?.data);
     }
-}
+    console.error("Error updating class: ", error);
+    throw error;
+  }
+};
 
 export const getClassById = async (id: string): Promise<Classroom> => {
-    try {
-        const response = await axiosClient.get(`/classrooms/${id}`);
-        return response.data.data;
-    } catch (error) {
-        if (axios.isAxiosError(error)) {
-            console.error("API Error: ", error.response?.data);
-        }
-        console.error("Error updating class: ", error);
-        throw error;
+  try {
+    const response = await axiosClient.get(`/classrooms/${id}`);
+    return response.data.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error("API Error: ", error.response?.data);
     }
-}
+    console.error("Error updating class: ", error);
+    throw error;
+  }
+};
