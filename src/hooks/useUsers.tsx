@@ -7,6 +7,7 @@ export const useGetProfile = () => {
     queryKey: ["profile"],
     queryFn: getProfile,
     retry: 0,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -21,6 +22,6 @@ export const useUpdateProfile = () => {
     onError: (error) => {
       throw error;
     },
-    onSettled: () => {},
+    onSettled: () => { },
   });
 };
