@@ -1,89 +1,64 @@
 "use client";
+import React, { useRef, useState } from "react";
+import UploadFile from "./upload-file";
+import { useRouter } from "next/navigation";
+import {
+  useDeleteSession,
+  useGetSessionDetails,
+  useUpdateSession,
+} from "@/hooks/useSessions";
+import { useGetDocFileDetails } from "@/hooks/useDocfiles";
+import Image from "next/image";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { LoadingButton } from "@/components/ui/loading-button";
-import { useUploadFile } from "@/hooks/useDocfiles";
-import { File, X } from "lucide-react";
-import React, { useRef, useState } from "react";
 
-export default function QuestionsTab() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { mutate: uploadFile, status } = useUploadFile();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const handleClick = () => {
-    fileInputRef.current?.click();
-  };
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-    console.log("file: ", file);
-  };
+interface IQuestionsTabProps {
+  id: string;
+}
 
-  const handleUpload = () => {
-    if (selectedFile) {
-      console.log("upload");
-      uploadFile(selectedFile);
+export default function QuestionsTab({ id }: IQuestionsTabProps) {
+  const router = useRouter();
+  const { data: sessionData, isLoading, isError } = useGetSessionDetails(id);
+  const { mutate: updateSession } = useUpdateSession(id);
+  const presentationId = sessionData?.data?.presentationId;
+  const { data: docFileData } = useGetDocFileDetails(presentationId ?? "");
+
+  const handleUploadSuccess = (response: any) => {
+    const newPresentationId = response?.data?.docFile?.id;
+    if (newPresentationId) {
+      updateSession({ presentationId: newPresentationId });
     }
   };
 
-  const handleClear = (event: React.MouseEvent<SVGElement, MouseEvent>) => {
-    event.stopPropagation();
-    setSelectedFile(null);
-  };
-
+  if (!sessionData?.data?.presentationId) {
+    console.log(sessionData?.data);
+    return (
+      <UploadFile typeAccept=".pptx" onUploadSuccess={handleUploadSuccess} />
+    );
+  }
   return (
-    // <div className="flex flex-col items-center justify-center h-full">
-    //   <EmptyList />
-    //   <Button className="w-1/3 justify-center">Create Question</Button>
-    // </div>
     <div>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <div className="text-xl">Upload a Presentation File </div>
-          </CardTitle>
-          <CardDescription>
-            Select a file to upload then using the upload button below
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col space-y-4 justify-center">
-          <div
-            className="flex flex-col p-[20px] border-dashed border-2 border-gray-300 rounded-lg items-center space-y-2 cursor-pointer"
-            onClick={handleClick}
-          >
-            {selectedFile ? (
-              <div className="flex space-x-5">
-                <div className="text-muted-foreground">{selectedFile.name}</div>
-                <X strokeWidth={1.5} color="#737373" onClick={handleClear} />
-              </div>
-            ) : (
-              <div className="flex flex-col items-center">
-                <File color="#737373" />
-                <div className="text-muted-foreground">
-                  Upload a file or drag and drop
-                </div>
-              </div>
-            )}
-            <Input
-              type="file"
-              ref={fileInputRef}
-              onChange={handleFileChange}
-              className="hidden"
-            />
+      {Array.isArray(docFileData?.data?.url) ? (
+        docFileData.data.url.map((url, index) => (
+          <div key={index} className="flex justify-center p-4">
+            <Card>
+              <CardTitle>
+                <div className="p-5">Slide {index + 1}</div>
+              </CardTitle>
+              <CardContent>
+                <Image src={url} width={500} height={300} alt="" />
+              </CardContent>
+              <CardDescription></CardDescription>
+            </Card>
           </div>
-          <LoadingButton loading={status === "pending"} onClick={handleUpload}>
-            Upload
-          </LoadingButton>
-        </CardContent>
-      </Card>
+        ))
+      ) : (
+        <div>No URLs available</div>
+      )}
     </div>
   );
 }
