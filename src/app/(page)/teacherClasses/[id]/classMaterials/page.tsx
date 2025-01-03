@@ -21,12 +21,16 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
-import { useClassById } from '@/hooks/useTeacherClasses';
+import { useClassById } from "@/hooks/useTeacherClasses";
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { useUploadFile } from "@/hooks/useDocfiles";
 import { File, X } from "lucide-react";
-import { useCreateMaterial, useTeacherMaterial_tanstack, useUpdateMaterial } from "@/hooks/useMaterials";
+import {
+  useCreateMaterial,
+  useTeacherMaterial_tanstack,
+  useUpdateMaterial,
+} from "@/hooks/useMaterials";
 import { Material } from "@/types/material-response";
 
 export default function MaterialTable() {
@@ -43,23 +47,19 @@ export default function MaterialTable() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { mutate: uploadFile, status } = useUploadFile();
+  const { mutate: uploadFile, status } = useUploadFile({});
 
   const { classroom, isLoading, isError, refetch } = useClassById(id as string);
   // const { materials, loading, error, refetchMaterials } = useTeacherMaterial(id as string);
-  const { materials, loading, error, refetchMaterials } = useTeacherMaterial_tanstack(id as string);
+  const { materials, loading, error, refetchMaterials } =
+    useTeacherMaterial_tanstack(id as string);
 
   const { mutate } = useUpdateMaterial(id);
 
-  const { mutate: createMaterial } = useCreateMaterial(
-    id as string,
-    () => {
-      setOpen(false);
-      refetchMaterials();
-    }
-  );
-
-
+  const { mutate: createMaterial } = useCreateMaterial(id as string, () => {
+    setOpen(false);
+    refetchMaterials();
+  });
 
   if (isLoading) {
     return <ThreeDotsWave />;
@@ -91,14 +91,10 @@ export default function MaterialTable() {
     return <div>No class details found.</div>;
   }
 
-
-
   const openEditDialog = (material: Material) => {
     setCurrentMaterial(material);
     setEditMaterialOpen(true);
   };
-
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,12 +119,12 @@ export default function MaterialTable() {
     }
   };
 
-
   const handleUpdateMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentMaterial) return;
 
-    if (!currentMaterial.title.trim() || !currentMaterial.description.trim()) return;
+    if (!currentMaterial.title.trim() || !currentMaterial.description.trim())
+      return;
 
     if (currentMaterial.url && !isValidUrl(currentMaterial.url)) {
       alert("Invalid URL. Please enter a valid URL.");
@@ -142,8 +138,8 @@ export default function MaterialTable() {
           newMaterial: {
             title: currentMaterial.title,
             description: currentMaterial.description,
-            url: currentMaterial.url || undefined
-          }
+            url: currentMaterial.url || undefined,
+          },
         },
         {
           onSuccess: () => {
@@ -160,10 +156,6 @@ export default function MaterialTable() {
       console.error("Error updating material:", error);
     }
   };
-
-
-
-
 
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -192,11 +184,11 @@ export default function MaterialTable() {
   const isValidUrl = (url: string): boolean => {
     const urlPattern = new RegExp(
       "^(https?:\\/\\/)?" +
-      "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
-      "((\\d{1,3}\\.){3}\\d{1,3}))" +
-      "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
-      "(\\?[;&a-z\\d%_.~+=-]*)?" +
-      "(\\#[-a-z\\d_]*)?$",
+        "((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|" +
+        "((\\d{1,3}\\.){3}\\d{1,3}))" +
+        "(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*" +
+        "(\\?[;&a-z\\d%_.~+=-]*)?" +
+        "(\\#[-a-z\\d_]*)?$",
       "i"
     );
 
@@ -227,7 +219,9 @@ export default function MaterialTable() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="materialDescription">Material Description</Label>
+                  <Label htmlFor="materialDescription">
+                    Material Description
+                  </Label>
                   <Input
                     id="materialDescription"
                     value={description}
@@ -253,8 +247,14 @@ export default function MaterialTable() {
                   >
                     {selectedFile ? (
                       <div className="flex space-x-5">
-                        <div className="text-muted-foreground">{selectedFile.name}</div>
-                        <X strokeWidth={1.5} color="#737373" onClick={handleClear} />
+                        <div className="text-muted-foreground">
+                          {selectedFile.name}
+                        </div>
+                        <X
+                          strokeWidth={1.5}
+                          color="#737373"
+                          onClick={handleClear}
+                        />
                       </div>
                     ) : (
                       <div className="flex flex-col items-center">
@@ -270,7 +270,10 @@ export default function MaterialTable() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    <LoadingButton loading={status === "pending"} onClick={handleUpload}>
+                    <LoadingButton
+                      loading={status === "pending"}
+                      onClick={handleUpload}
+                    >
                       Upload
                     </LoadingButton>
                   </div>
@@ -307,7 +310,9 @@ export default function MaterialTable() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="materialDescription">Material Description</Label>
+                <Label htmlFor="materialDescription">
+                  Material Description
+                </Label>
                 <Input
                   id="materialDescription"
                   value={currentMaterial?.description || ""}
@@ -345,21 +350,33 @@ export default function MaterialTable() {
 
       <Table>
         <TableCaption>
-          There are {materials.length} materials in {classroom.classroomName} class
+          There are {materials.length} materials in {classroom.classroomName}{" "}
+          class
         </TableCaption>
         <TableHeader className="bg-slate-200 text-lg">
           <TableRow>
-            <TableCell className="text-center font-bold text-black">No.</TableCell>
-            <TableCell className="text-center font-bold text-black">Material</TableCell>
-            <TableCell className="text-center font-bold text-black">Description</TableCell>
-            <TableCell className="text-center font-bold text-black">Link</TableCell>
-            <TableCell className="text-center font-bold text-black">File</TableCell>
-            <TableCell className="text-center font-bold text-black">Actions</TableCell>
+            <TableCell className="text-center font-bold text-black">
+              No.
+            </TableCell>
+            <TableCell className="text-center font-bold text-black">
+              Material
+            </TableCell>
+            <TableCell className="text-center font-bold text-black">
+              Description
+            </TableCell>
+            <TableCell className="text-center font-bold text-black">
+              Link
+            </TableCell>
+            <TableCell className="text-center font-bold text-black">
+              File
+            </TableCell>
+            <TableCell className="text-center font-bold text-black">
+              Actions
+            </TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
           {materials.map((mat, index) => (
-
             <TableRow key={mat.id}>
               <TableCell className="text-center">{index + 1}</TableCell>
               <TableCell className="text-center">{mat.title}</TableCell>
@@ -367,7 +384,9 @@ export default function MaterialTable() {
               {/* <TableCell className="text-center"><a href={mat.url} className="underline text-blue-700">{mat.url}</a></TableCell> */}
               <TableCell className="text-center">
                 {mat.url && mat.url.trim() !== "" ? (
-                  <a href={mat.url} className="underline text-blue-700">{mat.url}</a>
+                  <a href={mat.url} className="underline text-blue-700">
+                    {mat.url}
+                  </a>
                 ) : (
                   <p>-</p>
                 )}
@@ -385,14 +404,18 @@ export default function MaterialTable() {
                 )}
               </TableCell>
               <TableCell className="text-center">
-                <Button className="m-2" variant="secondary" onClick={() => openEditDialog(mat)}>Edit</Button>
+                <Button
+                  className="m-2"
+                  variant="secondary"
+                  onClick={() => openEditDialog(mat)}
+                >
+                  Edit
+                </Button>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </>
-  )
+  );
 }
-
-
