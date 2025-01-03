@@ -18,7 +18,7 @@ export default function SessionPage() {
           {sessionId && <InformationTab id={sessionId} />}
         </TabsContent>
         <TabsContent value="questions">
-          <QuestionsTab />
+          {sessionId && <QuestionsTab id={sessionId} />}
         </TabsContent>
         <TabsContent value="settings">
           {sessionId && <SettingsTab id={sessionId} />}

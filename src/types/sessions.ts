@@ -23,6 +23,7 @@ export interface UpdateSessionBody {
   sessionDate?: string;
   startTime?: string;
   endTime?: string;
+  presentationId?: string;
 }
 
 export type SessionResponse = ApiResponse<SessionData>;

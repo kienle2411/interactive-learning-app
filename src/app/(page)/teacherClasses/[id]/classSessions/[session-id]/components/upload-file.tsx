@@ -14,11 +14,22 @@ import React, { useRef, useState } from "react";
 
 interface IUploadFileProps {
   typeAccept: string;
+  onUploadSuccess?: (presentationId: string) => void;
 }
 
-export default function UploadFile({ typeAccept }: IUploadFileProps) {
+export default function UploadFile({
+  typeAccept,
+  onUploadSuccess,
+}: IUploadFileProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { mutate: uploadFile, status } = useUploadFile();
+  const { mutate: uploadFile, status } = useUploadFile({
+    onUploadSuccess: (response) => {
+      console.log("Upload successful! Response:", response);
+      if (onUploadSuccess) {
+        onUploadSuccess(response);
+      }
+    },
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleClick = () => {
     fileInputRef.current?.click();
@@ -34,6 +45,7 @@ export default function UploadFile({ typeAccept }: IUploadFileProps) {
     if (selectedFile) {
       console.log("upload");
       uploadFile(selectedFile);
+      console.log();
     }
   };
 
