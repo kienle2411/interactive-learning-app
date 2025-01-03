@@ -1,12 +1,8 @@
 "use client";
-import React, { useRef, useState } from "react";
+import React from "react";
 import UploadFile from "./upload-file";
 import { useRouter } from "next/navigation";
-import {
-  useDeleteSession,
-  useGetSessionDetails,
-  useUpdateSession,
-} from "@/hooks/useSessions";
+import { useGetSessionDetails, useUpdateSession } from "@/hooks/useSessions";
 import { useGetDocFileDetails } from "@/hooks/useDocfiles";
 import Image from "next/image";
 import {
@@ -21,8 +17,7 @@ interface IQuestionsTabProps {
 }
 
 export default function QuestionsTab({ id }: IQuestionsTabProps) {
-  const router = useRouter();
-  const { data: sessionData, isLoading, isError } = useGetSessionDetails(id);
+  const { data: sessionData } = useGetSessionDetails(id);
   const { mutate: updateSession } = useUpdateSession(id);
   const presentationId = sessionData?.data?.presentationId;
   const { data: docFileData } = useGetDocFileDetails(presentationId ?? "");
