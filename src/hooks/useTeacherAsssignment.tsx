@@ -3,7 +3,7 @@ import { Assignment } from "@/types/assignment-response-teacher";
 import { useQuery } from "@tanstack/react-query";
 
 const useTeacherAssignment = () => {
-    const useListTeacherAssignment = (id: string) => {
+    const useListTeacherAssignmentByClass = (id: string) => {
         return useQuery<Assignment[], Error>({
             queryKey: ["teacher-assignment", id],
             queryFn: async () => {
@@ -26,12 +26,23 @@ const useTeacherAssignment = () => {
         });
     }
 
+    const useGetAssignmentById = (id: string) => {
+        return useQuery<Assignment, Error>({
+            queryKey: ["teacher-assignment-by-id", id],
+            queryFn: async () => {
+                const result = await teacherAssignment.getById(id);
+                console.log("useGetAssignmentById: ", result);
+                return result;
+            },
+            enabled: !!id,
+        });
+    };
+
     return {
-        useListTeacherAssignment,
+        useListTeacherAssignmentByClass,
         useListAllTeacherAssignment,
+        useGetAssignmentById,
     }
-
-
 }
 
 export default useTeacherAssignment;

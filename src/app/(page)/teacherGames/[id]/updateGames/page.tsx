@@ -18,35 +18,78 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import React, { useState, useEffect } from "react";
-
+import React, { useState, useMemo, useEffect } from "react";
+import { useTeacherClasses } from "@/hooks/useTeacherClasses";
+import useTeacherAssignment from "@/hooks/useTeacherAsssignment";
 import { DialogClose } from "@radix-ui/react-dialog";
 import QuestionCard, { AnswerProps } from "../../components/questionCard";
+import ThreeDotsWave from "@/components/ui/three-dot-wave";
+import { useParams } from "next/navigation";
 
 const Page = () => {
+  const params = useParams();
+  const id = params?.id as string;
+
+  const { classes, loading: loadingClasses } = useTeacherClasses();
+
+  const { useGetAssignmentById } = useTeacherAssignment();
+  const { data: assignmentt, isLoading, isError } = useGetAssignmentById(id);
+
+  const enrichedAssignment = useMemo(() => {
+    if (!assignmentt || !classes) return null;
+
+
+    const clsId = assignmentt.classroomId;
+    const classrooms = classes.find((cls) => cls.id === clsId);
+    const classNames = classrooms?.classroomName || "";
+    let className = Array.isArray(classNames) ? classNames.join("") : classNames;
+    if (!className) className = "-";
+    return {
+      ...assignmentt,
+      className,
+    };
+  }, [assignmentt, classes]);
+
+  console.log("[id]/updateGames enrichedAssignment: ", enrichedAssignment);
+
   const [questions, setQuestions] = useState([
     {
       question: "What is React?",
       answers: [
-        { text: "Library for building UI", isCorrect: false },
-        { text: "Programming language", isCorrect: true },
+        { text: "Library for building UI", isCorrect: true },
+        { text: "Programming language", isCorrect: false },
         { text: "Backend framework", isCorrect: false },
         { text: "Database", isCorrect: false },
       ],
     },
   ]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
 
-  const [currentDate, setCurrentDate] = useState("");
+  const [assignment, setAssignment] = useState({
+    title: "",
+    description: "",
+    classRoom: "",
+    createdDate: "",
+  })
+
+  useEffect(() => {
+    if (enrichedAssignment) {
+      const createdDate = new Date(enrichedAssignment.createdAt);
+      const day = String(createdDate.getDate()).padStart(2, "0");
+      const month = String(createdDate.getMonth() + 1).padStart(2, "0");
+      const year = createdDate.getFullYear();
+
+      const formattedDate = `${day}/${month}/${year}`;
+
+      setAssignment({
+        title: enrichedAssignment.title,
+        description: enrichedAssignment.description,
+        classRoom: enrichedAssignment.className,
+        createdDate: formattedDate,
+      });
+    }
+  }, [enrichedAssignment]);
+
   const [newQuestion, setNewQuestion] = useState({
     question: "",
     answers: [
@@ -57,6 +100,14 @@ const Page = () => {
     ],
   });
 
+  if (loadingClasses || isLoading) {
+    return <ThreeDotsWave />;
+  }
+
+  if (!classes || classes.length === 0 || isError) {
+    <div>No assignment available</div>
+  }
+
   const updateQuestion = (
     index: number,
     updatedQuestion: { question: string; answers: AnswerProps[] }
@@ -66,22 +117,6 @@ const Page = () => {
     setQuestions(updatedQuestions); // Update the state
   };
 
-  useEffect(() => {
-    const updateDate = () => {
-      const today = new Date();
-      const dateString = today.toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      });
-      setCurrentDate(dateString);
-    };
-
-    updateDate();
-    const intervalId = setInterval(updateDate, 60000); // Update every minute
-
-    return () => clearInterval(intervalId);
-  }, []);
 
   const handleDeleteQuestion = (index: number) => {
     const updatedQuestions = questions.filter((_, i) => i !== index);
@@ -118,17 +153,12 @@ const Page = () => {
                 <Label htmlFor="framework" className="font-semibold">
                   Class Name
                 </Label>
-                <Select required>
-                  <SelectTrigger id="framework">
-                    <SelectValue placeholder="Select" />
-                  </SelectTrigger>
-                  <SelectContent position="popper">
-                    <SelectItem value="next">UIT123</SelectItem>
-                    <SelectItem value="sveltekit">UIT100</SelectItem>
-                    <SelectItem value="astro">ENG143</SelectItem>
-                    <SelectItem value="nuxt">JPN312</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Input
+                  id="class-name"
+                  placeholder="ClassName"
+                  readOnly
+                  value={assignment.classRoom}
+                />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="date" className="font-semibold">
@@ -138,7 +168,7 @@ const Page = () => {
                   id="date"
                   placeholder="Date"
                   readOnly
-                  defaultValue={currentDate}
+                  defaultValue={assignment.createdDate}
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
@@ -148,8 +178,13 @@ const Page = () => {
                 <Input
                   id="title"
                   placeholder="Enter title"
-                  defaultValue={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  value={assignment.title}
+                  onChange={(e) => {
+                    setAssignment((prevState) => ({
+                      ...prevState,
+                      title: e.target.value,
+                    }));
+                  }}
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
@@ -159,8 +194,13 @@ const Page = () => {
                 <Input
                   id="description"
                   placeholder="Enter description"
-                  defaultValue={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  defaultValue={assignment.description}
+                  onChange={(e) => {
+                    setAssignment((prevState) => ({
+                      ...prevState,
+                      description: e.target.value,
+                    }));
+                  }}
                 />
               </div>
             </div>
