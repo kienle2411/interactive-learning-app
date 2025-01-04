@@ -1,7 +1,7 @@
 import teacherQuestion from "@/api/endpoints/teacherQuestion";
 import { QuestionWithChoices } from "@/types/choice-response-teacher";
 import { Question } from "@/types/question-response-teacher";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useTeacherQuestion = () => {
     const useListQuestionById = (id: string) => {
@@ -28,9 +28,28 @@ const useTeacherQuestion = () => {
         });
     }
 
+    const useUpdateQuestion = () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: ({
+                id,
+                questionTitle,
+            }: {
+                id: string;
+                questionTitle: string;
+            }) => teacherQuestion.update(id, questionTitle),
+            onSuccess: (_, req) => {
+                queryClient.invalidateQueries({
+                    queryKey: ["teacher-assignment-by-id", req.id],
+                });
+            },
+        });
+    };
+
     return {
         useListQuestionById,
         useDetailQuestion,
+        useUpdateQuestion,
     }
 }
 

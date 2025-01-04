@@ -55,8 +55,9 @@ const Page = () => {
   const { useGetAssignmentById, useUpdateAssignment } = useTeacherAssignment();
   const { mutate: updateAssignment } = useUpdateAssignment();
   const { data: assignmentData, isLoading: loadingAssignment, isError: assignmentError } = useGetAssignmentById(id);
-  const { useListQuestionById } = useTeacherQuestion();
+  const { useListQuestionById, useUpdateQuestion } = useTeacherQuestion();
   const { data: questionsList, isLoading: loadingQuestions } = useListQuestionById(id);
+  const { mutate: updateQuestion } = useUpdateQuestion();
 
   // State management
   const [questions, setQuestions] = useState<QuestionState[]>([]);
@@ -215,17 +216,51 @@ const Page = () => {
     );
   };
 
+
   const handleUpdateQuestion = (
     index: number,
     updatedQuestion: Omit<QuestionState, 'id'>
   ) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[index] = {
-      ...updatedQuestion,
-      id: questions[index].id
-    };
-    setQuestions(updatedQuestions);
+    const questionId = questions[index].id;
+    if (!questionId) {
+      toast({
+        title: "Cannot update question - ID not found",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Update the question title in the backend
+    updateQuestion(
+      {
+        id: questionId,
+        questionTitle: updatedQuestion.question,
+      },
+      {
+        onSuccess: () => {
+          // Update local state
+          const updatedQuestions = [...questions];
+          updatedQuestions[index] = {
+            ...updatedQuestion,
+            id: questionId
+          };
+          setQuestions(updatedQuestions);
+
+          toast({
+            title: "Question updated successfully",
+            variant: "success"
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Failed to update question",
+            variant: "destructive"
+          });
+        }
+      }
+    );
   };
+
 
   const handleDeleteQuestion = (index: number) => {
     setQuestions(questions.filter((_, i) => i !== index));
