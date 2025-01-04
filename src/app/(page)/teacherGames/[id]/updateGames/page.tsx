@@ -55,9 +55,10 @@ const Page = () => {
   const { useGetAssignmentById, useUpdateAssignment } = useTeacherAssignment();
   const { mutate: updateAssignment } = useUpdateAssignment();
   const { data: assignmentData, isLoading: loadingAssignment, isError: assignmentError } = useGetAssignmentById(id);
-  const { useListQuestionById, useUpdateQuestion } = useTeacherQuestion();
+  const { useListQuestionById, useUpdateQuestion, useUpdateChoice } = useTeacherQuestion();
   const { data: questionsList, isLoading: loadingQuestions } = useListQuestionById(id);
   const { mutate: updateQuestion } = useUpdateQuestion();
+  const { mutate: updateChoice } = useUpdateChoice();
 
   // State management
   const [questions, setQuestions] = useState<QuestionState[]>([]);
@@ -143,6 +144,7 @@ const Page = () => {
       id: detail.id,
       question: detail.content || detail.questionTitle,
       answers: detail.options?.map(choice => ({
+        id: choice.id,  // Thêm id của choice
         text: choice.content,
         isCorrect: choice.isCorrectAnswer
       })) || []
@@ -217,6 +219,54 @@ const Page = () => {
   };
 
 
+  // const handleUpdateQuestion = (
+  //   index: number,
+  //   updatedQuestion: Omit<QuestionState, 'id'>
+  // ) => {
+  //   const questionId = questions[index].id;
+  //   if (!questionId) {
+  //     toast({
+  //       title: "Cannot update question - ID not found",
+  //       variant: "destructive"
+  //     });
+  //     return;
+  //   }
+
+  //   // Update the question title in the backend
+  //   updateQuestion(
+  //     {
+  //       id: questionId,
+  //       questionTitle: updatedQuestion.question,
+  //     },
+  //     {
+  //       onSuccess: () => {
+  //         // Update local state
+  //         const updatedQuestions = [...questions];
+  //         updatedQuestions[index] = {
+  //           ...updatedQuestion,
+  //           id: questionId
+  //         };
+  //         setQuestions(updatedQuestions);
+
+  //         toast({
+  //           title: "Question updated successfully",
+  //           variant: "success"
+  //         });
+  //       },
+  //       onError: () => {
+  //         toast({
+  //           title: "Failed to update question",
+  //           variant: "destructive"
+  //         });
+  //       }
+  //     }
+  //   );
+  // };
+
+
+
+
+
   const handleUpdateQuestion = (
     index: number,
     updatedQuestion: Omit<QuestionState, 'id'>
@@ -260,6 +310,33 @@ const Page = () => {
       }
     );
   };
+
+  const handleUpdateChoice = (choiceId: string, content: string, isCorrect: boolean) => {
+    updateChoice(
+      {
+        id: choiceId,
+        data: {
+          content,
+          isCorrectAnswer: isCorrect
+        }
+      },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Answer option updated successfully",
+            variant: "success"
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Failed to update answer option",
+            variant: "destructive"
+          });
+        }
+      }
+    );
+  };
+
 
 
   const handleDeleteQuestion = (index: number) => {
@@ -454,7 +531,7 @@ const Page = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6">
-          {questions.map((q, index) => (
+          {/* {questions.map((q, index) => (
             <QuestionCard
               key={q.id || index}
               question={q.question}
@@ -462,6 +539,19 @@ const Page = () => {
               onUpdate={(updatedQuestion) =>
                 handleUpdateQuestion(index, updatedQuestion)
               }
+              onDelete={() => handleDeleteQuestion(index)}
+            />
+          ))} */}
+          {questions.map((q, index) => (
+            <QuestionCard
+              key={q.id || index}
+              id={q.id}
+              question={q.question}
+              answers={q.answers}
+              onUpdate={(updatedQuestion) =>
+                handleUpdateQuestion(index, updatedQuestion)
+              }
+              onUpdateChoice={handleUpdateChoice}
               onDelete={() => handleDeleteQuestion(index)}
             />
           ))}

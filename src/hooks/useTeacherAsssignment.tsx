@@ -56,11 +56,27 @@ const useTeacherAssignment = () => {
         });
     };
 
+    const useDeleteAssignment = () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: (id: string) => teacherAssignment.delete(id),
+            onSuccess: (_, id) => {
+                queryClient.invalidateQueries({ queryKey: ["teacher-assignment-all"] });
+                queryClient.invalidateQueries({ queryKey: ["teacher-assignment-by-id", id] });
+            },
+            onError: (error) => {
+                console.error("Error deleting assignment:", error);
+                //notif hay gi do
+            },
+        });
+    }
+
     return {
         useListTeacherAssignmentByClass,
         useListAllTeacherAssignment,
         useGetAssignmentById,
         useUpdateAssignment,
+        useDeleteAssignment,
     }
 }
 

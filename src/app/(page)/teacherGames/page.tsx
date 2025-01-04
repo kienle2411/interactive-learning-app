@@ -9,15 +9,39 @@ import useTeacherAssignment from "@/hooks/useTeacherAsssignment";
 export default function Page() {
   const { classes, loading: loadingClasses } = useTeacherClasses();
 
-  const { useListAllTeacherAssignment } = useTeacherAssignment();
+  const { useListAllTeacherAssignment, useDeleteAssignment } = useTeacherAssignment();
   const { data: assignments, isLoading, isError } = useListAllTeacherAssignment();
+  const { mutate: deleteAssignment } = useDeleteAssignment();
+
+  // const enrichedAssignments = useMemo(() => {
+  //   if (!assignments || !classes) return [];
+
+  //   return assignments.map((asm) => {
+  //     const clsId = asm.classroomId;
+  //     const classrooms = classes.find((clss) => clss.id === clsId);
+  //     const classNames = classrooms?.classroomName || "";
+
+  //     let className = Array.isArray(classNames) ? classNames.join("") : classNames;
+
+  //     if (!className) className = "-";
+
+  //     return {
+  //       ...asm,
+  //       className,
+  //     };
+  //   });
+  // }, [assignments, classes]);
 
   const enrichedAssignments = useMemo(() => {
     if (!assignments || !classes) return [];
 
-    return assignments.map((asm) => {
+    // Lọc các bài tập không có deletedAt và các lớp có deletedAt là null
+    const filteredClasses = classes.filter((clss) => clss.deletedAt === null);
+    const filteredAssignments = assignments.filter((asm) => asm.deletedAt === null);
+
+    return filteredAssignments.map((asm) => {
       const clsId = asm.classroomId;
-      const classrooms = classes.find((clss) => clss.id === clsId);
+      const classrooms = filteredClasses.find((clss) => clss.id === clsId);
       const classNames = classrooms?.classroomName || "";
 
       let className = Array.isArray(classNames) ? classNames.join("") : classNames;
@@ -42,10 +66,15 @@ export default function Page() {
 
   console.log("assignment: ", enrichedAssignments);
 
-  // Hàm xử lý khi xoá
   const handleDeleteGame = (id: string) => {
-    // setQuizzes((prevGames) => prevGames.filter((game) => game.id !== id));
-    console.log("Delete: ", id);
+    deleteAssignment(id, {
+      onSuccess: () => {
+        console.log("Assignment deleted successfully.");
+      },
+      onError: (error) => {
+        console.error("Error deleting assignment:", error);
+      },
+    });
   };
 
   return (

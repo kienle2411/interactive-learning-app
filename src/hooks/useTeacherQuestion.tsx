@@ -1,5 +1,6 @@
+import teacherChoice from "@/api/endpoints/teacherChoice";
 import teacherQuestion from "@/api/endpoints/teacherQuestion";
-import { QuestionWithChoices } from "@/types/choice-response-teacher";
+import { ChoiceUpdate, QuestionWithChoices } from "@/types/choice-response-teacher";
 import { Question } from "@/types/question-response-teacher";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -46,10 +47,29 @@ const useTeacherQuestion = () => {
         });
     };
 
+    const useUpdateChoice = () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: ({
+                id,
+                data,
+            }: {
+                id: string;
+                data: ChoiceUpdate;
+            }) => teacherChoice.update(id, data),
+            onSuccess: (_, req) => {
+                queryClient.invalidateQueries({
+                    queryKey: ["teacher-assignment-by-id", req.id],
+                });
+            },
+        });
+    };
+
     return {
         useListQuestionById,
         useDetailQuestion,
         useUpdateQuestion,
+        useUpdateChoice,
     }
 }
 
