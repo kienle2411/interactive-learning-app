@@ -30,7 +30,7 @@ interface GamesCardProps {
   id: string; // Unique ID for the class
   nameOfClass: string;
   nameOfQuiz: string;
-  questions: number;
+  questions: string;
   onDelete: (id: string) => void;
 }
 // {id, nameOfClass, nameOfQuiz, questions}
@@ -92,7 +92,7 @@ const GameCard: React.FC<GamesCardProps> = ({
       <Card className="grid grid-cols-2 pl-2 pr-2 justify-around gap-1 shadow-md hover:shadow-lg transition-shadow">
         <CardHeader>
           <h2 className="font-bold text-lg">{nameOfQuiz}</h2>
-          <p>There are {questions} questions</p>
+          <p>{questions}</p>
         </CardHeader>
         {/* card-content */}
         <CardContent className="pt-2 pb-2 pl-4 flex flex-row items-center justify-between">

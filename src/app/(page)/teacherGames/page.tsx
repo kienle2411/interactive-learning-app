@@ -1,36 +1,51 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import React, { useState } from "react";
+import React, { useMemo } from "react";
 import GameCard from "./components/gameCard";
+import { useTeacherClasses } from "@/hooks/useTeacherClasses";
+import ThreeDotsWave from "@/components/ui/three-dot-wave";
+import useTeacherAssignment from "@/hooks/useTeacherAsssignment";
 
 export default function Page() {
-  // {id, nameOfClass, nameOfQuiz, questions}
-  const [quizzes, setQuizzes] = useState<
-    { id: string; nameOfClass: string; nameOfQuiz: string; questions: number }[]
-  >([
-    {
-      id: "1",
-      nameOfClass: "UIT123",
-      nameOfQuiz: "Quiz1",
-      questions: 17,
-    },
-    {
-      id: "2",
-      nameOfClass: "UIT123",
-      nameOfQuiz: "Quiz2",
-      questions: 10,
-    },
-    {
-      id: "3",
-      nameOfClass: "ENG100",
-      nameOfQuiz: "Quiz14",
-      questions: 30,
-    },
-  ]);
+  const { classes, loading: loadingClasses } = useTeacherClasses();
+
+  const { useListAllTeacherAssignment } = useTeacherAssignment();
+  const { data: assignments, isLoading, isError } = useListAllTeacherAssignment();
+
+  const enrichedAssignments = useMemo(() => {
+    if (!assignments || !classes) return [];
+
+    return assignments.map((asm) => {
+      const clsId = asm.classroomId;
+      const classrooms = classes.find((clss) => clss.id === clsId);
+      const classNames = classrooms?.classroomName || "";
+
+      let className = Array.isArray(classNames) ? classNames.join("") : classNames;
+
+      if (!className) className = "-";
+
+      return {
+        ...asm,
+        className,
+      };
+    });
+  }, [assignments, classes]);
+
+
+  if (loadingClasses || isLoading) {
+    return <ThreeDotsWave />;
+  }
+
+  if (!classes || classes.length === 0 || isError) {
+    <div>No assignment available</div>
+  }
+
+  console.log("assignment: ", enrichedAssignments);
 
   // Hàm xử lý khi xoá
   const handleDeleteGame = (id: string) => {
-    setQuizzes((prevGames) => prevGames.filter((game) => game.id !== id));
+    // setQuizzes((prevGames) => prevGames.filter((game) => game.id !== id));
+    console.log("Delete: ", id);
   };
 
   return (
@@ -49,14 +64,13 @@ export default function Page() {
           </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
-          {/* <GameCard id='123' nameOfClass='UIT123' nameOfQuiz='Quiz1' questions={17} /> */}
-          {quizzes.map((quiz) => (
+          {enrichedAssignments?.map((assignment) => (
             <GameCard
-              key={quiz.id}
-              id={quiz.id}
-              nameOfClass={quiz.nameOfClass}
-              nameOfQuiz={quiz.nameOfQuiz}
-              questions={quiz.questions}
+              key={assignment.id}
+              id={assignment.id}
+              nameOfClass={assignment.className}
+              nameOfQuiz={assignment.title}
+              questions={assignment.description}
               onDelete={handleDeleteGame} // Truyền hàm xoá vào component
             />
           ))}
