@@ -1,6 +1,7 @@
 import {
   deleteSession,
   getSessionDetails,
+  getSessionsClassroom,
   updateSession,
 } from "@/api/endpoints/sessions";
 import queryClient from "@/api/query-client";
@@ -61,5 +62,13 @@ export const useDeleteSession = (
         duration: 1000,
       });
     },
+  });
+};
+
+export const useGetSessionClassrooms = (classroomId: string) => {
+  return useQuery({
+    queryKey: ["sessions", classroomId],
+    queryFn: () => getSessionsClassroom(classroomId),
+    retry: 0,
   });
 };

@@ -1,7 +1,6 @@
 "use client";
 import { useGetSessionClassrooms } from "@/hooks/useSessions";
-import { useParams, usePathname } from "next/navigation";
-import SessionCard from "../../components/sessionCard";
+import { useParams } from "next/navigation";
 import SessionCardMedium from "@/components/ui/session-card";
 
 export default function SessionTab() {

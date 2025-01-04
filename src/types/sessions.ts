@@ -1,4 +1,4 @@
-import { ApiResponse } from "./response-types";
+import { ApiResponse, PaginateReponse } from "./response-types";
 
 export interface SessionData {
   data: SessionData;
@@ -27,3 +27,4 @@ export interface UpdateSessionBody {
 }
 
 export type SessionResponse = ApiResponse<SessionData>;
+export type SessionsResponse = ApiResponse<PaginateReponse<SessionData[]>>;
