@@ -30,3 +30,14 @@ export interface ApiAssignmentAll {
     statusCode: number;
     data: Assignment[];
 }
+
+export interface ApiAssignmentById {
+    status: string;
+    statusCode: number;
+    data: Assignment;
+}
+
+export interface AssignmentUpdate {
+    title?: string;
+    description?: string;
+}

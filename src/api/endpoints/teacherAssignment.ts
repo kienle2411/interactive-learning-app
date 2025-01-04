@@ -1,4 +1,4 @@
-import { ApiAssignment, ApiAssignmentAll } from "@/types/assignment-response-teacher";
+import { ApiAssignment, ApiAssignmentAll, ApiAssignmentById, AssignmentUpdate } from "@/types/assignment-response-teacher";
 import axiosClient from "../axios-client";
 
 const teacherAssignment = {
@@ -20,7 +20,27 @@ const teacherAssignment = {
             console.error("Assignment fetched error: ", error);
             throw new Error("Failed to fetch data");
         }
-    }
+    },
+
+    getById: async (id: string) => {
+        try {
+            const response = await axiosClient.get<ApiAssignmentById>(`/assignments/${id}`);
+            return response.data.data;
+        } catch (error) {
+            console.error("Assignment fetched error: ", error);
+            throw new Error("Failed to fetch data");
+        }
+    },
+
+    update: async (id: string, data: AssignmentUpdate) => {
+        try {
+            const response = await axiosClient.patch(`/assignments/${id}`, data);
+            return response.data;
+        } catch (error) {
+            console.error("Assignment updated error: ", error);
+            throw new Error("Failed to update data");
+        }
+    },
 }
 
 export default teacherAssignment;
