@@ -1,6 +1,6 @@
 import teacherAssignment from "@/api/endpoints/teacherAssignment";
-import { Assignment } from "@/types/assignment-response-teacher";
-import { useQuery } from "@tanstack/react-query";
+import { Assignment, AssignmentUpdate } from "@/types/assignment-response-teacher";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const useTeacherAssignment = () => {
     const useListTeacherAssignmentByClass = (id: string) => {
@@ -38,10 +38,29 @@ const useTeacherAssignment = () => {
         });
     };
 
+    const useUpdateAssignment = () => {
+        const queryClient = useQueryClient();
+        return useMutation({
+            mutationFn: ({
+                id,
+                body,
+            }: {
+                id: string;
+                body: AssignmentUpdate;
+            }) => teacherAssignment.update(id, body),
+            onSuccess: (_, req) => {
+                queryClient.invalidateQueries({
+                    queryKey: ["teacher-assignment-by-id", req.id],
+                });
+            },
+        });
+    };
+
     return {
         useListTeacherAssignmentByClass,
         useListAllTeacherAssignment,
         useGetAssignmentById,
+        useUpdateAssignment,
     }
 }
 

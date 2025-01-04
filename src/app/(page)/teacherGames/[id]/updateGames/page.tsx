@@ -26,6 +26,7 @@ import { DialogClose } from "@radix-ui/react-dialog";
 import QuestionCard, { AnswerProps } from "../../components/questionCard";
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
 import { useParams } from "next/navigation";
+import { toast } from "@/hooks/use-toast";
 
 const Page = () => {
   const params = useParams();
@@ -33,7 +34,8 @@ const Page = () => {
 
   const { classes, loading: loadingClasses } = useTeacherClasses();
 
-  const { useGetAssignmentById } = useTeacherAssignment();
+  const { useGetAssignmentById, useUpdateAssignment } = useTeacherAssignment();
+  const { mutate: updateAssignment } = useUpdateAssignment();
   const { data: assignmentt, isLoading, isError } = useGetAssignmentById(id);
 
   const enrichedAssignment = useMemo(() => {
@@ -89,6 +91,44 @@ const Page = () => {
       });
     }
   }, [enrichedAssignment]);
+
+  const handleReset = () => {
+    if (enrichedAssignment) {
+      const createdDate = new Date(enrichedAssignment.createdAt);
+      const day = String(createdDate.getDate()).padStart(2, "0");
+      const month = String(createdDate.getMonth() + 1).padStart(2, "0");
+      const year = createdDate.getFullYear();
+
+      const formattedDate = `${day}/${month}/${year}`;
+
+      console.log(enrichedAssignment);
+
+      setAssignment({
+        title: enrichedAssignment.title,
+        description: enrichedAssignment.description,
+        classRoom: enrichedAssignment.className,
+        createdDate: formattedDate,
+      });
+    }
+  };
+
+  const handleUpdate = async () => {
+    const updateData = {
+      title: assignment.title,
+      description: assignment.description,
+    };
+    updateAssignment(
+      { id: id, body: updateData },
+      {
+        onSuccess: () => {
+          toast({
+            title: "Assignment updated Successfully",
+            variant: 'success'
+          })
+        }
+      }
+    );
+  }
 
   const [newQuestion, setNewQuestion] = useState({
     question: "",
@@ -194,7 +234,7 @@ const Page = () => {
                 <Input
                   id="description"
                   placeholder="Enter description"
-                  defaultValue={assignment.description}
+                  value={assignment.description}
                   onChange={(e) => {
                     setAssignment((prevState) => ({
                       ...prevState,
@@ -209,11 +249,11 @@ const Page = () => {
             <Button
               variant="outline"
               className="ml-4 mr-4"
-              onClick={(e) => e.preventDefault()}
+              onClick={handleReset}
             >
               Reset
             </Button>
-            <Button className="ml-4" onClick={(e) => e.preventDefault()}>
+            <Button className="ml-4" onClick={handleUpdate}>
               Save changes
             </Button>
           </CardFooter>
