@@ -1,102 +1,95 @@
-import {
-  SessionResponse,
-  SessionsResponse,
-  UpdateSessionBody,
-} from "@/types/sessions";
-import axiosClient from "../axios-client";
 import axios from "axios";
+import axiosClient from "../axios-client";
 
-export const getSessionDetails = async (
-  sessionId: string
-): Promise<SessionResponse> => {
+export const createQuestion = async (data: CreateQuestionData) => {
   try {
-    const response = await axiosClient.get(`/sessions/${sessionId}`);
+    const response = await axiosClient.post("/questions", data);
+    console.log(response);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
         console.error(
-          "Error during get session: ",
+          "Error during create question: ",
           error.response.data.message + ": " + error.response.data.errors[0]
         );
       } else {
         console.error("Error with no response: ", error.message);
       }
     } else {
-      console.error("General error during get session: ", error);
+      console.error("General error during create question: ", error);
     }
     throw error;
   }
 };
 
-export const updateSession = async (
-  sessionId: string,
-  updateSessionBody: UpdateSessionBody
+export const createChoice = async (
+  questionId: string,
+  data: CreateChoiceData
 ) => {
   try {
-    const response = await axiosClient.patch(
-      `/sessions/${sessionId}`,
-      updateSessionBody
-    );
-    return response.data;
+    const response = axiosClient.post(`/questions/${questionId}/choices`, data);
+    return response;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
         console.error(
-          "Error during update session: ",
+          "Error during create choice: ",
           error.response.data.message + ": " + error.response.data.errors[0]
         );
       } else {
         console.error("Error with no response: ", error.message);
       }
     } else {
-      console.error("General error during update session: ", error);
+      console.error("General error during create choice: ", error);
     }
     throw error;
   }
 };
 
-export const deleteSession = async (sessionId: string) => {
+export const updateQuestion = async (
+  questionId: string,
+  data: Partial<CreateQuestionData>
+) => {
   try {
-    const response = await axiosClient.delete(`/sessions/${sessionId}`);
+    const response = await axiosClient.patch(`/questions/${questionId}`, data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
         console.error(
-          "Error during delete session: ",
+          "Error during update question: ",
           error.response.data.message + ": " + error.response.data.errors[0]
         );
       } else {
         console.error("Error with no response: ", error.message);
       }
     } else {
-      console.error("General error during delete session: ", error);
+      console.error("General error during update question: ", error);
     }
     throw error;
   }
 };
 
-export const getSessionsClassroom = async (
-  classroomId: string
-): Promise<SessionsResponse> => {
+export const updateChoice = async (
+  choiceId: string,
+  data: Partial<CreateChoiceData>
+) => {
   try {
-    const response = await axiosClient.get(
-      `/classrooms/${classroomId}/sessions`
-    );
+    const response = await axiosClient.patch(`/choices/${choiceId}`, data);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response) {
         console.error(
-          "Error during get all session: ",
+          "Error during update question: ",
           error.response.data.message + ": " + error.response.data.errors[0]
         );
       } else {
         console.error("Error with no response: ", error.message);
       }
     } else {
-      console.error("General error during get all session: ", error);
+      console.error("General error during update question: ", error);
     }
     throw error;
   }

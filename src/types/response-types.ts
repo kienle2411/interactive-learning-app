@@ -14,4 +14,11 @@ interface ErrorResponse<T> {
   data?: T;
 }
 
+export interface PaginateReponse<T> {
+  data: T;
+  lastPage: number;
+  page: number;
+  total: number;
+}
+
 export type ApiResponse<T> = SuccessResponse<T> | ErrorResponse<T>;

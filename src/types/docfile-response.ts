@@ -10,6 +10,7 @@ export interface DocFileData {
   deletedAt: string;
   url: string[];
   submissionId: string;
+  questions: QuestionData[];
 }
 
 export type DocFileResponse = ApiResponse<DocFileData>;
