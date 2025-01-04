@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,61 +28,100 @@ import QuestionCard, { AnswerProps } from "../../components/questionCard";
 import ThreeDotsWave from "@/components/ui/three-dot-wave";
 import { useParams } from "next/navigation";
 import { toast } from "@/hooks/use-toast";
+import useTeacherQuestion from "@/hooks/useTeacherQuestion";
+import { Question } from "@/types/question-response-teacher";
+import { QuestionWithChoices } from "@/types/choice-response-teacher";
+import teacherQuestion from "@/api/endpoints/teacherQuestion";
+
+interface QuestionState {
+  id?: string;
+  question: string;
+  answers: AnswerProps[];
+}
+
+interface AssignmentState {
+  title: string;
+  description: string;
+  classRoom: string;
+  createdDate: string;
+}
 
 const Page = () => {
   const params = useParams();
   const id = params?.id as string;
 
+  // Hooks for data fetching
   const { classes, loading: loadingClasses } = useTeacherClasses();
-
   const { useGetAssignmentById, useUpdateAssignment } = useTeacherAssignment();
   const { mutate: updateAssignment } = useUpdateAssignment();
-  const { data: assignmentt, isLoading, isError } = useGetAssignmentById(id);
+  const { data: assignmentData, isLoading: loadingAssignment, isError: assignmentError } = useGetAssignmentById(id);
+  const { useListQuestionById } = useTeacherQuestion();
+  const { data: questionsList, isLoading: loadingQuestions } = useListQuestionById(id);
 
-  const enrichedAssignment = useMemo(() => {
-    if (!assignmentt || !classes) return null;
-
-
-    const clsId = assignmentt.classroomId;
-    const classrooms = classes.find((cls) => cls.id === clsId);
-    const classNames = classrooms?.classroomName || "";
-    let className = Array.isArray(classNames) ? classNames.join("") : classNames;
-    if (!className) className = "-";
-    return {
-      ...assignmentt,
-      className,
-    };
-  }, [assignmentt, classes]);
-
-  console.log("[id]/updateGames enrichedAssignment: ", enrichedAssignment);
-
-  const [questions, setQuestions] = useState([
-    {
-      question: "What is React?",
-      answers: [
-        { text: "Library for building UI", isCorrect: true },
-        { text: "Programming language", isCorrect: false },
-        { text: "Backend framework", isCorrect: false },
-        { text: "Database", isCorrect: false },
-      ],
-    },
-  ]);
-
-  const [assignment, setAssignment] = useState({
+  // State management
+  const [questions, setQuestions] = useState<QuestionState[]>([]);
+  const [assignment, setAssignment] = useState<AssignmentState>({
     title: "",
     description: "",
     classRoom: "",
     createdDate: "",
-  })
+  });
 
+  const [newQuestion, setNewQuestion] = useState<QuestionState>({
+    question: "",
+    answers: Array(4).fill({ text: "", isCorrect: false }),
+  });
+
+  // Process assignment data
+  const enrichedAssignment = useMemo(() => {
+    if (!assignmentData || !classes?.length) return null;
+
+    const classroom = classes.find((cls) => cls.id === assignmentData.classroomId);
+    const classroomName = classroom?.classroomName || "-";
+
+    return {
+      ...assignmentData,
+      className: Array.isArray(classroomName) ? classroomName.join("") : classroomName,
+    };
+  }, [assignmentData, classes]);
+
+  // Fetch question details
+  useEffect(() => {
+    const fetchQuestionDetails = async () => {
+      if (!questionsList?.length) return;
+
+      try {
+        const detailedQuestions = await Promise.all(
+          questionsList.map(async (question: Question) => {
+            try {
+              const questionDetail = await teacherQuestion.detail(question.id);
+              return formatQuestionDetail(questionDetail);
+            } catch (error) {
+              console.error(`Error fetching question ${question.id}:`, error);
+              return null;
+            }
+          })
+        );
+
+        const validQuestions = detailedQuestions.filter((q): q is QuestionState => q !== null);
+        setQuestions(validQuestions);
+      } catch (error) {
+        console.error("Error fetching question details:", error);
+        toast({
+          title: "Error loading questions",
+          variant: "destructive"
+        });
+      }
+    };
+
+    fetchQuestionDetails();
+  }, [questionsList]);
+
+  // Update assignment data when available
   useEffect(() => {
     if (enrichedAssignment) {
       const createdDate = new Date(enrichedAssignment.createdAt);
-      const day = String(createdDate.getDate()).padStart(2, "0");
-      const month = String(createdDate.getMonth() + 1).padStart(2, "0");
-      const year = createdDate.getFullYear();
-
-      const formattedDate = `${day}/${month}/${year}`;
+      const formattedDate = formatDate(createdDate);
 
       setAssignment({
         title: enrichedAssignment.title,
@@ -92,95 +132,133 @@ const Page = () => {
     }
   }, [enrichedAssignment]);
 
+  // Helper functions
+  const formatDate = (date: Date): string => {
+    return `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
+  };
+
+  const formatQuestionDetail = (detail: QuestionWithChoices): QuestionState => {
+    return {
+      id: detail.id,
+      question: detail.content || detail.questionTitle,
+      answers: detail.options?.map(choice => ({
+        text: choice.content,
+        isCorrect: choice.isCorrectAnswer
+      })) || []
+    };
+  };
+
+  const validateNewQuestion = (): boolean => {
+    if (!newQuestion.question.trim()) {
+      toast({
+        title: "Question text is required",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (newQuestion.answers.some(answer => !answer.text.trim())) {
+      toast({
+        title: "All answer options must be filled",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    if (!newQuestion.answers.some(answer => answer.isCorrect)) {
+      toast({
+        title: "Please select a correct answer",
+        variant: "destructive"
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  // Event handlers
   const handleReset = () => {
     if (enrichedAssignment) {
       const createdDate = new Date(enrichedAssignment.createdAt);
-      const day = String(createdDate.getDate()).padStart(2, "0");
-      const month = String(createdDate.getMonth() + 1).padStart(2, "0");
-      const year = createdDate.getFullYear();
-
-      const formattedDate = `${day}/${month}/${year}`;
-
-      console.log(enrichedAssignment);
-
       setAssignment({
         title: enrichedAssignment.title,
         description: enrichedAssignment.description,
         classRoom: enrichedAssignment.className,
-        createdDate: formattedDate,
+        createdDate: formatDate(createdDate),
       });
     }
   };
 
   const handleUpdate = async () => {
-    const updateData = {
-      title: assignment.title,
-      description: assignment.description,
-    };
     updateAssignment(
-      { id: id, body: updateData },
+      {
+        id,
+        body: {
+          title: assignment.title,
+          description: assignment.description,
+        }
+      },
       {
         onSuccess: () => {
           toast({
-            title: "Assignment updated Successfully",
-            variant: 'success'
-          })
+            title: "Assignment updated successfully",
+            variant: "success"
+          });
+        },
+        onError: () => {
+          toast({
+            title: "Failed to update assignment",
+            variant: "destructive"
+          });
         }
       }
     );
-  }
-
-  const [newQuestion, setNewQuestion] = useState({
-    question: "",
-    answers: [
-      { text: "", isCorrect: false },
-      { text: "", isCorrect: false },
-      { text: "", isCorrect: false },
-      { text: "", isCorrect: false },
-    ],
-  });
-
-  if (loadingClasses || isLoading) {
-    return <ThreeDotsWave />;
-  }
-
-  if (!classes || classes.length === 0 || isError) {
-    <div>No assignment available</div>
-  }
-
-  const updateQuestion = (
-    index: number,
-    updatedQuestion: { question: string; answers: AnswerProps[] }
-  ) => {
-    const updatedQuestions = [...questions];
-    updatedQuestions[index] = updatedQuestion; // Update the question at index
-    setQuestions(updatedQuestions); // Update the state
   };
 
-
-  const handleDeleteQuestion = (index: number) => {
-    const updatedQuestions = questions.filter((_, i) => i !== index);
+  const handleUpdateQuestion = (
+    index: number,
+    updatedQuestion: Omit<QuestionState, 'id'>
+  ) => {
+    const updatedQuestions = [...questions];
+    updatedQuestions[index] = {
+      ...updatedQuestion,
+      id: questions[index].id
+    };
     setQuestions(updatedQuestions);
   };
 
+  const handleDeleteQuestion = (index: number) => {
+    setQuestions(questions.filter((_, i) => i !== index));
+  };
+
   const handleAddQuestion = () => {
+    if (!validateNewQuestion()) return;
+
     setQuestions([...questions, newQuestion]);
     setNewQuestion({
       question: "",
-      answers: [
-        { text: "", isCorrect: false },
-        { text: "", isCorrect: false },
-        { text: "", isCorrect: false },
-        { text: "", isCorrect: false },
-      ], // Reset after adding the question
+      answers: Array(4).fill({ text: "", isCorrect: false }),
     });
   };
+
+  // Loading and error states
+  if (loadingClasses || loadingAssignment || loadingQuestions) {
+    return <ThreeDotsWave />;
+  }
+
+  if (assignmentError || !classes?.length) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <p className="text-lg text-gray-600">No assignment available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full p-8">
       <div className="flex flex-col w-full gap-[20px]">
         <div className="flex justify-between items-center">
-          <span className="text-3xl font-bold">Update a Game</span>
+          <span className="text-3xl font-bold">Update Assignment</span>
         </div>
 
         <Card className="shadow-md">
@@ -190,57 +268,53 @@ const Page = () => {
           <CardContent>
             <div className="grid w-full items-center grid-cols-2 gap-10">
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="framework" className="font-semibold">
+                <Label htmlFor="class-name" className="font-semibold">
                   Class Name
                 </Label>
                 <Input
                   id="class-name"
-                  placeholder="ClassName"
+                  placeholder="Class Name"
                   readOnly
                   value={assignment.classRoom}
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="date" className="font-semibold">
+                <Label htmlFor="created-date" className="font-semibold">
                   Created Date
                 </Label>
                 <Input
-                  id="date"
+                  id="created-date"
                   placeholder="Date"
                   readOnly
-                  defaultValue={assignment.createdDate}
+                  value={assignment.createdDate}
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="date" className="font-semibold">
+                <Label htmlFor="title" className="font-semibold">
                   Title
                 </Label>
                 <Input
                   id="title"
                   placeholder="Enter title"
                   value={assignment.title}
-                  onChange={(e) => {
-                    setAssignment((prevState) => ({
-                      ...prevState,
-                      title: e.target.value,
-                    }));
-                  }}
+                  onChange={(e) => setAssignment(prev => ({
+                    ...prev,
+                    title: e.target.value
+                  }))}
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="date" className="font-semibold">
+                <Label htmlFor="description" className="font-semibold">
                   Description
                 </Label>
                 <Input
                   id="description"
                   placeholder="Enter description"
                   value={assignment.description}
-                  onChange={(e) => {
-                    setAssignment((prevState) => ({
-                      ...prevState,
-                      description: e.target.value,
-                    }));
-                  }}
+                  onChange={(e) => setAssignment(prev => ({
+                    ...prev,
+                    description: e.target.value
+                  }))}
                 />
               </div>
             </div>
@@ -248,12 +322,12 @@ const Page = () => {
           <CardFooter className="flex justify-end">
             <Button
               variant="outline"
-              className="ml-4 mr-4"
+              className="mx-4"
               onClick={handleReset}
             >
               Reset
             </Button>
-            <Button className="ml-4" onClick={handleUpdate}>
+            <Button onClick={handleUpdate}>
               Save changes
             </Button>
           </CardFooter>
@@ -267,7 +341,7 @@ const Page = () => {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[625px]">
               <DialogHeader>
-                <DialogTitle>Question</DialogTitle>
+                <DialogTitle>Add New Question</DialogTitle>
               </DialogHeader>
               <div className="grid gap-5 py-1">
                 <div className="grid grid-cols-5 items-center gap-4">
@@ -275,28 +349,23 @@ const Page = () => {
                     className="col-span-5"
                     placeholder="Type your question here"
                     value={newQuestion.question}
-                    onChange={(e) =>
-                      setNewQuestion({
-                        ...newQuestion,
-                        question: e.target.value,
-                      })
-                    }
-                    required
+                    onChange={(e) => setNewQuestion(prev => ({
+                      ...prev,
+                      question: e.target.value
+                    }))}
                   />
                 </div>
                 <RadioGroup
-                  value={newQuestion.answers
-                    .findIndex((ans) => ans.isCorrect)
-                    .toString()}
+                  value={String(newQuestion.answers.findIndex(ans => ans.isCorrect))}
                   onValueChange={(value) => {
                     const selectedIndex = parseInt(value);
-                    const updatedAnswers = newQuestion.answers.map(
-                      (answer, index) => ({
+                    setNewQuestion(prev => ({
+                      ...prev,
+                      answers: prev.answers.map((answer, index) => ({
                         ...answer,
-                        isCorrect: index === selectedIndex,
-                      })
-                    );
-                    setNewQuestion({ ...newQuestion, answers: updatedAnswers });
+                        isCorrect: index === selectedIndex
+                      }))
+                    }));
                   }}
                   className="flex flex-col space-y-1"
                 >
@@ -317,18 +386,20 @@ const Page = () => {
                         value={newQuestion.answers[idx].text}
                         onChange={(e) => {
                           const updatedAnswers = [...newQuestion.answers];
-                          updatedAnswers[idx].text = e.target.value;
-                          setNewQuestion({
-                            ...newQuestion,
-                            answers: updatedAnswers,
-                          });
+                          updatedAnswers[idx] = {
+                            ...updatedAnswers[idx],
+                            text: e.target.value
+                          };
+                          setNewQuestion(prev => ({
+                            ...prev,
+                            answers: updatedAnswers
+                          }));
                         }}
                         className="col-span-3"
-                        required
                       />
                       <div className="text-center flex justify-center items-center">
                         <RadioGroupItem
-                          value={idx.toString()}
+                          value={String(idx)}
                           id={`r${idx + 1}`}
                         />
                       </div>
@@ -338,7 +409,7 @@ const Page = () => {
               </div>
               <DialogFooter>
                 <DialogClose asChild>
-                  <Button type="button" onClick={handleAddQuestion}>
+                  <Button onClick={handleAddQuestion}>
                     Add Question
                   </Button>
                 </DialogClose>
@@ -347,14 +418,14 @@ const Page = () => {
           </Dialog>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-6">
           {questions.map((q, index) => (
             <QuestionCard
-              key={index}
+              key={q.id || index}
               question={q.question}
               answers={q.answers}
               onUpdate={(updatedQuestion) =>
-                updateQuestion(index, updatedQuestion)
+                handleUpdateQuestion(index, updatedQuestion)
               }
               onDelete={() => handleDeleteQuestion(index)}
             />
