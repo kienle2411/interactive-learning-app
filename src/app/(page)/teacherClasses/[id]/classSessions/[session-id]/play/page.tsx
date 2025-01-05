@@ -127,8 +127,8 @@ export default function SessionPlayPage() {
           </Button>
         </div>
         <div>
-          {questions.map((question) => (
-            <Card>
+          {questions.map((question, index) => (
+            <Card key={index}>
               <CardContent className="flex justify-between pt-6">
                 <div>{question.questionTitle}</div>
                 <Button onClick={() => sendQuestionToStudent(question)}>

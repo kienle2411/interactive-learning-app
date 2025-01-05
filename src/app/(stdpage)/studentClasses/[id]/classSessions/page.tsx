@@ -11,8 +11,8 @@ export default function SessionTab() {
   return (
     <div className="w-full">
       {Array.isArray(sessions?.data?.data) ? (
-        sessions.data.data.map((session) => (
-          <SessionCardMedium session={session} />
+        sessions.data.data.map((session, index) => (
+          <SessionCardMedium key={index} session={session} />
         ))
       ) : (
         <div>No sessions available</div>

@@ -131,7 +131,7 @@ export default function QuestionForm({
         : updateQuestion(questionBody, {
             onSuccess: (data) => {
               const questionId = data.data.id;
-              const existingChoiceIds = question.options?.map(
+              const existingChoiceIds = question?.options?.map(
                 (option) => option.id
               );
               choices.forEach((choice, index) => {
