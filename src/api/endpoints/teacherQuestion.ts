@@ -22,6 +22,16 @@ const teacherQuestion = {
             throw new Error("Failed to fetch data");
         }
     },
+
+    update: async (id: string, title: string) => {
+        try {
+            const response = await axiosClient.patch(`/questions/${id}`, { questionTitle: title });
+            return response.data;
+        } catch (error) {
+            console.error("Questions update error: ", error);
+            throw new Error("Failed to update data");
+        }
+    },
 }
 
 export default teacherQuestion;

@@ -31,3 +31,8 @@ export interface ApiQuestionWithChoice {
     statusCode: number;
     data: QuestionWithChoices;
 }
+
+export interface ChoiceUpdate {
+    content?: string;
+    isCorrectAnswer?: boolean;
+}

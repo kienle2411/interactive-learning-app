@@ -41,6 +41,16 @@ const teacherAssignment = {
             throw new Error("Failed to update data");
         }
     },
+
+    delete: async (id: string) => {
+        try {
+            const response = await axiosClient.delete(`/assignments/${id}`);
+            return response.data;
+        } catch (error) {
+            console.error("Assignment delete error: ", error);
+            throw new Error("Failed to delete data");
+        }
+    },
 }
 
 export default teacherAssignment;
