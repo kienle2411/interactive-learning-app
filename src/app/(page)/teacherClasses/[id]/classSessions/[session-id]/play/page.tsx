@@ -2,18 +2,22 @@
 import { Button } from "@/components/ui/button";
 import { useGetDocFileDetails } from "@/hooks/useDocfiles";
 import { useGetSessionDetails } from "@/hooks/useSessions";
-import { MoveLeft, MoveRight, StopCircle } from "lucide-react";
+import { MoveLeft, MoveRight, Send, StopCircle } from "lucide-react";
 import Image from "next/image";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-import Cookies from "js-cookie";
+import { Card, CardContent } from "@/components/ui/card";
 
 const socket = io("http://localhost:3001");
 
 export default function SessionPlayPage() {
   const { "session-id": sessionId } = useParams();
   const [slide, setSlide] = useState(0);
+  const [submitList, setSubmitList] = useState<
+    { studentId: string; questionId: string; response: string }[]
+  >([]);
+  const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [sessionMessage, setSessionMessage] = useState<string>("");
   const [isStopped, setStopped] = useState(false);
   const id = Array.isArray(sessionId) ? sessionId[0] : sessionId;
@@ -28,7 +32,14 @@ export default function SessionPlayPage() {
         slideUrl: docFileData?.data?.url[slide],
       });
     }
-  }, [slide, isStopped]);
+
+    if (docFileData?.data?.questions) {
+      const filteredQuestions = docFileData.data.questions.filter(
+        (question) => question.orderInSlide === slide - 1
+      );
+      setQuestions(filteredQuestions);
+    }
+  }, [slide, isStopped, docFileData, id]);
 
   function nextSlide() {
     if (
@@ -49,6 +60,10 @@ export default function SessionPlayPage() {
     socket.emit("joinSession", {
       sessionId: id,
       userId: "teacher",
+    });
+
+    socket.on("updateSubmitList", (data) => {
+      setSubmitList(data);
     });
 
     socket.on("sessionJoined", (data) => {
@@ -73,6 +88,13 @@ export default function SessionPlayPage() {
     setStopped(false);
     socket.emit("resumePresentation", { sessionId: id });
   }
+
+  const sendQuestionToStudent = (question: QuestionData) => {
+    socket.emit("sendQuestion", {
+      sessionId,
+      question: question,
+    });
+  };
 
   return (
     <div className="flex gap-5">
@@ -104,9 +126,39 @@ export default function SessionPlayPage() {
             <MoveRight />
           </Button>
         </div>
-        <div>{docFileData?.data?.url.length}</div>
+        <div>
+          {questions.map((question) => (
+            <Card>
+              <CardContent className="flex justify-between pt-6">
+                <div>{question.questionTitle}</div>
+                <Button onClick={() => sendQuestionToStudent(question)}>
+                  <Send />
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-      <div className="basis-1/2">{/* Submit List */}</div>
+      <div className="basis-1/2">
+        <h2 className="text-xl font-bold mb-4">Submitted Answers</h2>
+        <div className="space-y-4">
+          {submitList.map((submission, index) => (
+            <Card key={index}>
+              <CardContent>
+                <p>
+                  <strong>Student ID:</strong> {submission.studentId}
+                </p>
+                <p>
+                  <strong>Question ID:</strong> {submission.questionId}
+                </p>
+                <p>
+                  <strong>Answer:</strong> {submission.response}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
